@@ -637,43 +637,46 @@ export default function AdminDashboard() {
         <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/3 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
         <div className="relative z-10">
-      <header className="border-b border-white/20 bg-white/10 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+      <header className="glass-card border-b border-white/10 backdrop-blur-xl animate-fade-in sticky top-0">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
+          <div className="flex items-center gap-4">
+            <div className="relative">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold text-lg">Z</span>
               </div>
-              <h1 className="text-3xl font-bold text-white tracking-tight">Admin Console</h1>
+              <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/20 to-violet-600/20 rounded-xl blur opacity-75"></div>
             </div>
-            <p className="text-base text-slate-300 max-w-lg">
-              Comprehensive dashboard for managing partners, monitoring submissions, and analyzing performance data.
-            </p>
+            <div>
+              <h1 className="text-xl font-bold text-gradient">Admin Console</h1>
+              <p className="text-xs text-muted-foreground">
+                Dashboard & Analytics
+              </p>
+            </div>
           </div>
-          <div className="flex items-center gap-3 text-xs text-slate-400">
-            <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-left shadow-lg backdrop-blur-sm">
-              <p className="font-semibold text-white text-sm">{user?.email}</p>
-              <p className="text-xs uppercase tracking-wide text-slate-400 font-medium">Administrator</p>
+          <div className="flex items-center gap-2">
+            <div className="glass-card-light rounded-xl px-3 py-2 text-center">
+              <p className="text-xs font-medium text-white">{user?.email}</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">Admin</p>
             </div>
             <Button
-              variant="outline"
               onClick={() => navigate("/admin/invites")}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-700 hover:to-purple-700 shadow-lg font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
+              size="sm"
+              className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring"
             >
               Partner invites
             </Button>
             <Button
-              variant="outline"
               onClick={refreshOverview}
               disabled={loadingOverview}
-              className="bg-white/10 text-white border border-white/30 hover:bg-white/20 hover:border-white/50 shadow-md font-medium px-4 py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50"
+              size="sm"
+              className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring disabled:opacity-50"
             >
               {loadingOverview ? "Refreshing..." : "Refresh"}
             </Button>
             <Button
-              variant="outline"
               onClick={handleLogout}
-              className="bg-white/10 text-white border border-white/30 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-100 shadow-md font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
+              size="sm"
+              className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 hover:text-red-100 hover:bg-red-500/10 hover:border-red-500/20 focus-ring"
             >
               Logout
             </Button>
@@ -681,42 +684,44 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8">
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-          {heroCards.map((card) => (
+      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 animate-slide-up">
+          {heroCards.map((card, index) => (
             <MetricCard
               key={card.title}
               title={card.title}
               value={card.value}
               subtitle={card.subtitle}
+              className="hover-lift animate-fade-in"
+              style={{ animationDelay: `${index * 0.1}s` }}
             />
           ))}
         </section>
 
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {quickActionItems.map((action) => (
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 animate-scale-in">
+          {quickActionItems.map((action, index) => (
             <Card
               key={action.id}
-              className="group border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/30 overflow-hidden relative"
+              className="glass-card hover-lift group overflow-hidden rounded-xl animate-fade-in"
+              style={{ animationDelay: `${index * 0.15}s` }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-base font-semibold text-white group-hover:text-blue-100 transition-colors">
+                <CardTitle className="text-base font-semibold text-white group-hover:text-primary transition-colors">
                   {action.label}
                 </CardTitle>
-                <CardDescription className="text-slate-400 group-hover:text-slate-300 transition-colors">
+                <CardDescription className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors text-sm">
                   {action.description}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-0 relative z-10">
                 <Button
-                  variant="outline"
                   size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-700 hover:to-purple-700 shadow-md font-medium px-4 py-2 rounded-lg transition-all duration-200"
+                  className="btn-minimal rounded-lg px-4 py-1.5 focus-ring text-xs"
                   onClick={action.action}
                   disabled={loadingOverviewStats}
                 >
-                  {loadingOverviewStats ? "Loading..." : "Go"}
+                  {loadingOverviewStats ? "Loading..." : "View"}
                 </Button>
               </CardContent>
             </Card>
@@ -933,13 +938,13 @@ export default function AdminDashboard() {
           </select>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-5">
-          <Card className="border-white/10 bg-white/[0.08] backdrop-blur-xl xl:col-span-2 shadow-xl">
+        <section className="grid gap-4 xl:grid-cols-5 animate-scale-in">
+          <Card className="glass-card hover-lift xl:col-span-2 rounded-xl">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-white">
+              <CardTitle className="text-lg font-bold text-gradient">
                 Global revenue trend
               </CardTitle>
-              <CardDescription className="text-slate-400">Aggregated submissions by day</CardDescription>
+              <CardDescription className="text-muted-foreground text-sm">Aggregated submissions by day</CardDescription>
             </CardHeader>
             <CardContent className="h-[320px] px-0 pb-0">
               {loadingOverview && !overview ? (
@@ -996,12 +1001,12 @@ export default function AdminDashboard() {
           </Card>
 
           {/* Modern Partner Summary with fixed height and scroll */}
-          <Card className="border-white/10 bg-white/[0.08] backdrop-blur-xl xl:col-span-3 shadow-xl">
+          <Card className="glass-card hover-lift xl:col-span-3 rounded-xl">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg font-semibold text-white">Partner summary</CardTitle>
-                  <CardDescription className="text-slate-400">Snapshot of partner performance</CardDescription>
+                  <CardTitle className="text-lg font-bold text-gradient">Partner summary</CardTitle>
+                  <CardDescription className="text-muted-foreground text-sm">Snapshot of partner performance</CardDescription>
                 </div>
                 {partnerSummary.length > 0 && (
                   <div className="flex items-center gap-2">
@@ -1561,16 +1566,16 @@ export default function AdminDashboard() {
   );
 }
 
-function MetricCard({ title, value, subtitle }) {
+function MetricCard({ title, value, subtitle, className = "", style }) {
   return (
-    <Card className="group border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:from-white/[0.12] hover:to-white/[0.16] overflow-hidden relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      <CardContent className="p-6 relative z-10">
-        <div className="flex flex-col gap-4">
-          <p className="text-xs font-semibold uppercase tracking-widest text-slate-300 group-hover:text-slate-200 transition-colors">
+    <Card className={`group border-white/20 bg-gradient-to-br from-white/[0.06] to-white/[0.1] backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/30 hover:from-white/[0.08] hover:to-white/[0.12] overflow-hidden relative rounded-xl ${className}`} style={style}>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <CardContent className="p-4 relative z-10">
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 group-hover:text-slate-200 transition-colors">
             {title}
           </p>
-          <p className="text-3xl font-bold text-white group-hover:text-blue-100 transition-colors duration-300">{value}</p>
+          <p className="text-2xl font-bold text-white group-hover:text-blue-50 transition-colors duration-300">{value}</p>
           {subtitle && (
             <p className="text-xs text-slate-400 group-hover:text-slate-300 leading-relaxed transition-colors">
               {subtitle}
@@ -1579,7 +1584,7 @@ function MetricCard({ title, value, subtitle }) {
         </div>
       </CardContent>
       {/* Subtle border glow effect */}
-      <div className="absolute inset-0 rounded-lg ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-300"></div>
+      <div className="absolute inset-0 rounded-xl ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-300"></div>
     </Card>
   );
 }

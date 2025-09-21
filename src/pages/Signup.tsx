@@ -19,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Signup(): JSX.Element {
+export default function Signup() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signup, isAuthenticated } = useAuth();
@@ -98,24 +98,44 @@ export default function Signup(): JSX.Element {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-6 py-12 text-slate-100">
-      <Card className="w-full max-w-lg border-white/10 bg-white/[0.07] text-slate-100 shadow-[0_25px_60px_rgba(7,12,24,0.65)] backdrop-blur-xl">
-        <CardHeader className="space-y-2 text-left">
-          <CardTitle className="text-2xl text-white">Partner sign up</CardTitle>
-          <CardDescription className="text-sm text-slate-400">
-            Paste the invite token from your onboarding email and set your credentials to access the dashboard.
-          </CardDescription>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8 text-slate-100">
+      {/* Minimal background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/3 via-transparent to-violet-900/3"></div>
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500/[0.02] rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-violet-500/[0.02] rounded-full blur-3xl"></div>
+
+      <Card className="glass-card w-full max-w-md text-slate-100 shadow-xl hover-lift animate-scale-in rounded-2xl relative z-10 border-white/5">
+        <CardHeader className="space-y-6 text-center pb-6">
+          <div className="flex justify-center">
+            <div className="relative">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
+                <span className="text-white font-bold text-lg">Z</span>
+              </div>
+              <div className="absolute -inset-0.5 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-xl blur opacity-75"></div>
+            </div>
+          </div>
+          <div>
+            <CardTitle className="text-2xl font-bold text-gradient mb-2">
+              Partner Signup
+            </CardTitle>
+            <CardDescription className="text-sm text-muted-foreground">
+              Create your account
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="token" className="text-slate-200">
+            <div className="space-y-2">
+              <Label
+                htmlFor="token"
+                className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+              >
                 Invite token
               </Label>
               <Input
                 id="token"
                 type="text"
-                placeholder="Paste your invite token"
+                placeholder="Paste your invite token here"
                 value={token}
                 onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setToken(event.target.value);
@@ -124,103 +144,130 @@ export default function Signup(): JSX.Element {
                   }
                 }}
                 autoComplete="off"
-                className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
+                className="glass-card-light h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus-ring transition-all duration-200 focus:border-emerald-400/50 focus:bg-white/[0.05]"
               />
             </div>
-            <div>
-              <Label htmlFor="email" className="text-slate-200">
-                Work email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="partner@example.com"
-                autoComplete="email"
-                value={email}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  setEmail(event.target.value);
-                  if (error) {
-                    setError("");
-                  }
-                }}
-                className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
-              />
+
+            <div className="grid gap-4 grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="email"
+                  className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+                >
+                  Work email
+                </Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="partner@example.com"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    setEmail(event.target.value);
+                    if (error) {
+                      setError("");
+                    }
+                  }}
+                  className="glass-card-light h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus-ring transition-all duration-200 focus:border-emerald-400/50 focus:bg-white/[0.05]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="name"
+                  className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+                >
+                  Full name
+                </Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Enter your name"
+                  autoComplete="name"
+                  value={name}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    setName(event.target.value);
+                  }}
+                  className="glass-card-light h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus-ring transition-all duration-200 focus:border-emerald-400/50 focus:bg-white/[0.05]"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="name" className="text-slate-200">
-                Name
-              </Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="Full name"
-                autoComplete="name"
-                value={name}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  setName(event.target.value);
-                }}
-                className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
-              />
+
+            <div className="grid gap-4 grid-cols-2">
+              <div className="space-y-2">
+                <Label
+                  htmlFor="password"
+                  className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+                >
+                  Password
+                </Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  value={password}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    setPassword(event.target.value);
+                    if (error) {
+                      setError("");
+                    }
+                  }}
+                  className="glass-card-light h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus-ring transition-all duration-200 focus:border-emerald-400/50 focus:bg-white/[0.05]"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+                >
+                  Confirm
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  value={confirmPassword}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                    setConfirmPassword(event.target.value);
+                    if (error) {
+                      setError("");
+                    }
+                  }}
+                  className="glass-card-light h-11 rounded-lg border-white/10 bg-white/[0.03] text-white placeholder:text-slate-500 focus-ring transition-all duration-200 focus:border-emerald-400/50 focus:bg-white/[0.05]"
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="password" className="text-slate-200">
-                Password
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="new-password"
-                value={password}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  setPassword(event.target.value);
-                  if (error) {
-                    setError("");
-                  }
-                }}
-                className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
-              />
-            </div>
-            <div>
-              <Label htmlFor="confirmPassword" className="text-slate-200">
-                Confirm password
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="••••••••"
-                autoComplete="new-password"
-                value={confirmPassword}
-                onChange={(event: ChangeEvent<HTMLInputElement>) => {
-                  setConfirmPassword(event.target.value);
-                  if (error) {
-                    setError("");
-                  }
-                }}
-                className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
-              />
-            </div>
-            {error ? (
-              <p className="text-sm text-rose-300" role="alert">
-                {error}
-              </p>
-            ) : null}
+
+            {error && (
+              <div className="glass-card rounded-lg border border-red-400/20 bg-red-500/5 px-3 py-2.5">
+                <p className="text-sm text-red-300" role="alert">
+                  {error}
+                </p>
+              </div>
+            )}
+
             <Button
               type="submit"
-              className="w-full bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+              className="w-full h-11 bg-gradient-to-r from-emerald-500 to-teal-500 text-white border-0 hover:from-emerald-600 hover:to-teal-600 shadow-lg font-medium rounded-lg transition-all duration-200 focus-ring disabled:opacity-70 disabled:cursor-not-allowed"
               disabled={isSubmitting}
             >
               {isSubmitting ? "Creating account..." : "Create account"}
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="block text-left text-xs text-slate-400">
-          <p>
-            Already have access?{" "}
-            <Link to="/login" className="text-sky-300 underline">
-              Sign in
+
+        <CardFooter className="px-6 pb-6 pt-4">
+          <div className="text-center">
+            <Link
+              to="/login"
+              className="glass-card-light hover-lift inline-flex items-center justify-center px-3 py-2 rounded-lg text-xs font-medium text-emerald-300 hover:text-emerald-200 transition-all duration-200"
+            >
+              Already have access? Sign in →
             </Link>
-          </p>
+          </div>
         </CardFooter>
       </Card>
     </div>

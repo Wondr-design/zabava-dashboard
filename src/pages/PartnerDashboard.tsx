@@ -47,6 +47,7 @@ import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/lib/config";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MetricCard } from "@/components/MetricCard";
 import type { SubmissionRecord } from "@/types/dashboard";
 
 const COLORS = ["#22d3ee", "#a855f7", "#f97316", "#4ade80", "#facc15"];
@@ -95,17 +96,19 @@ export default function PartnerDashboard() {
   const partnerId = user?.partnerId || "";
   const userEmail = user?.email || "";
 
-  const primaryButtonClass = "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
-  const secondaryButtonClass = "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
+  const primaryButtonClass =
+    "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
+  const secondaryButtonClass =
+    "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
 
   const { data, loading, error, refetch } = usePartnerData(partnerId, {
     token,
     onUnauthorized: logout,
   });
   const [refreshing, setRefreshing] = useState<boolean>(false);
-  const [activeSection, setActiveSection] = useState<"overview" | "submissions">(
-    "overview"
-  );
+  const [activeSection, setActiveSection] = useState<
+    "overview" | "submissions"
+  >("overview");
 
   const overviewRef = useRef<HTMLDivElement | null>(null);
   const submissionsRef = useRef<HTMLDivElement | null>(null);
@@ -123,7 +126,7 @@ export default function PartnerDashboard() {
     return [];
   }, [data?.submissions]);
 
-  const partnerLabel = useMemo(() => {
+  const partnerLabel = useMemo((): string => {
     const submissionWithAttraction = submissions.find((entry) => {
       return (
         entry?.attractionName ||
@@ -137,12 +140,15 @@ export default function PartnerDashboard() {
 
     if (submissionWithAttraction) {
       return (
-        submissionWithAttraction.attractionName ||
-        submissionWithAttraction.partnerName ||
-        submissionWithAttraction.partnerLabel ||
-        submissionWithAttraction.originalPayload?.attractionName ||
-        submissionWithAttraction.originalPayload?.partnerName ||
-        submissionWithAttraction.originalPayload?.partnerLabel
+        String(submissionWithAttraction.attractionName || "") ||
+        String(submissionWithAttraction.partnerName || "") ||
+        String(submissionWithAttraction.partnerLabel || "") ||
+        String(
+          submissionWithAttraction.originalPayload?.attractionName || ""
+        ) ||
+        String(submissionWithAttraction.originalPayload?.partnerName || "") ||
+        String(submissionWithAttraction.originalPayload?.partnerLabel || "") ||
+        "Partner"
       );
     }
 
@@ -172,7 +178,9 @@ export default function PartnerDashboard() {
     endDate: "",
     search: "",
   });
-  const [visitUpdating, setVisitUpdating] = useState<Record<string, boolean>>({});
+  const [visitUpdating, setVisitUpdating] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const metrics = useMemo<MetricsSummary>(() => {
     const count = submissions.length;
@@ -336,7 +344,9 @@ export default function PartnerDashboard() {
         row.visitedAt || "",
         row.createdAt || "",
         row.cityCode || "",
-      ].map(escapeForCsv).join(",")
+      ]
+        .map(escapeForCsv)
+        .join(",")
     );
 
     const headerRow = header.map(escapeForCsv).join(",");
@@ -454,9 +464,7 @@ export default function PartnerDashboard() {
     if (!pieData.length) {
       return [];
     }
-    return [...pieData]
-      .sort((a, b) => b.value - a.value)
-      .slice(0, 3);
+    return [...pieData].sort((a, b) => b.value - a.value).slice(0, 3);
   }, [pieData]);
 
   const bestSubmission = useMemo<SubmissionRecord | null>(() => {
@@ -524,7 +532,7 @@ export default function PartnerDashboard() {
 
     const sections: Array<{
       id: "overview" | "submissions";
-      ref: RefObject<HTMLDivElement>;
+      ref: RefObject<HTMLDivElement | null>;
     }> = [
       { id: "overview", ref: overviewRef },
       { id: "submissions", ref: submissionsRef },
@@ -594,466 +602,474 @@ export default function PartnerDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-      <div className="grid min-h-screen md:grid-cols-[260px_1fr]">
-        <aside className="hidden border-r border-white/10 bg-white/5 backdrop-blur-xl md:flex md:flex-col">
-          <div className="flex items-center gap-3 px-6 py-6">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/25 text-lg font-semibold text-primary">
-              {partnerId ? partnerId.slice(0, 2).toUpperCase() : "L"}
-            </div>
-            <div>
-              <p className="text-sm font-medium text-white">{partnerId || "Partner"}</p>
-              <p className="text-xs text-slate-400">Partner Console</p>
-            </div>
-          </div>
-          <nav className="flex-1 space-y-1 px-4">
-            {navigationItems.map(({ id, label, active }) => (
-              <button
-                key={id}
-                type="button"
-                className={cn(
-                  "group flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
-                  active
-                    ? "bg-white/10 text-white shadow-lg shadow-primary/5"
-                    : "text-slate-300 hover:bg-white/10 hover:text-white"
-                )}
-                onClick={() => {
-                  const target = id === "overview" ? overviewRef : submissionsRef;
-                  target.current?.scrollIntoView({ behavior: "smooth" });
-                }}
-              >
-                <span className="flex-1 text-left">{label}</span>
-              </button>
-            ))}
-          </nav>
-        </aside>
+      {/* Minimal background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/3 via-transparent to-teal-900/3"></div>
+      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-emerald-500/[0.02] rounded-full blur-3xl"></div>
+      <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-teal-500/[0.02] rounded-full blur-3xl"></div>
 
-        <div className="flex flex-col">
-          <header className="border-b border-white/10 bg-white/5 backdrop-blur md:px-8 md:py-6">
-            <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 md:px-0">
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-3">
-                  <h1 className="text-2xl font-semibold text-white">Partner dashboard</h1>
-                  <Badge className="bg-emerald-500/20 text-emerald-200">Live</Badge>
-                  <Badge variant="outline" className="border-white/20 text-slate-200">
-                    {partnerId.toUpperCase()}
+      <div className="relative z-10">
+        <header className="glass-card border-b border-white/10 backdrop-blur-xl sticky top-0">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
+            <div className="flex items-center gap-4">
+              <div className="relative">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center shadow-lg">
+                  <span className="text-white font-bold text-lg">
+                    {partnerId ? partnerId.substring(0, 1).toUpperCase() : "P"}
+                  </span>
+                </div>
+                <div className="absolute -inset-0.5 bg-gradient-to-br from-emerald-400/20 to-teal-500/20 rounded-xl blur opacity-75"></div>
+              </div>
+              <div>
+                <div className="flex items-center gap-3 mb-1">
+                  <h1 className="text-xl font-bold text-gradient">
+                    Partner Dashboard
+                  </h1>
+                  <Badge className="glass-card-light text-emerald-200 border-emerald-500/30 px-2 py-0.5 text-xs">
+                    Live
                   </Badge>
                 </div>
-                <p className="text-sm text-slate-300">
-                  Real-time visibility into submissions, revenue, and points for your account.
+                <p className="text-xs text-muted-foreground">
+                  {partnerLabel || partnerId || "Partner Console"}
                 </p>
                 {lastUpdatedLabel && (
-                  <p className="text-xs text-slate-500">Last synced {lastUpdatedLabel}</p>
+                  <p className="text-xs text-muted-foreground/70">
+                    Last synced {lastUpdatedLabel}
+                  </p>
                 )}
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                {userEmail && (
-                  <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
-                    <p className="font-medium text-slate-200">{userEmail}</p>
-                    <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                      Partner account
-                    </p>
-                  </div>
-                )}
-                <Button
-                  variant="outline"
-                  onClick={handleRefresh}
-                  disabled={refreshing || loading}
-                  className={cn("gap-2", primaryButtonClass)}
-                >
-                  {refreshing ? (
-                    <RefreshCcw className="size-4 animate-spin" />
-                  ) : (
-                    <RefreshCcw className="size-4" />
-                  )}
-                  {refreshing ? "Refreshing" : "Refresh data"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleLogout}
-                  className={cn("gap-2", secondaryButtonClass)}
-                >
-                  <LogOut className="size-4" />
-                  Logout
-                </Button>
               </div>
             </div>
-          </header>
 
-          <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col space-y-8 px-4 py-6 md:px-10">
-            {error && (
-              <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-100">
-                {error.message || "Unable to load partner data. Please try again."}
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              {userEmail && (
+                <div className="glass-card-light rounded-xl px-3 py-2 text-center">
+                  <p className="text-xs font-medium text-white">{userEmail}</p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    Partner
+                  </p>
+                </div>
+              )}
+              <Button
+                onClick={handleRefresh}
+                disabled={refreshing || loading}
+                size="sm"
+                className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring disabled:opacity-50"
+              >
+                {refreshing ? (
+                  <RefreshCcw className="size-3 animate-spin mr-1.5" />
+                ) : (
+                  <RefreshCcw className="size-3 mr-1.5" />
+                )}
+                {refreshing ? "Refreshing" : "Refresh"}
+              </Button>
+              <Button
+                onClick={handleLogout}
+                size="sm"
+                className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 hover:text-red-100 hover:bg-red-500/10 hover:border-red-500/20 focus-ring"
+              >
+                <LogOut className="size-3 mr-1.5" />
+                Logout
+              </Button>
+            </div>
+          </div>
+        </header>
 
-            <section
-              ref={overviewRef}
-              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5"
-            >
-              <MetricCard
-                title="Total submissions"
-                value={numberFormatter.format(metrics.count)}
-                subtitle={`${numberFormatter.format(metrics.used)} used • ${numberFormatter.format(
-                  metrics.unused
-                )} pending`}
-              />
-              <MetricCard
-                title="Conversion rate"
-                value={`${conversionRate.toFixed(0)}%`}
-                subtitle="Usage of distributed tickets"
-              />
-              <MetricCard
-                title="Total revenue"
-                value={currencyFormatter.format(totalRevenue)}
-                subtitle={`Avg ${currencyFormatterDetailed.format(averageRevenue)} / submission`}
-              />
-              <MetricCard
-                title="Total points"
-                value={numberFormatter.format(points)}
-                subtitle={`Avg ${numberFormatter.format(metrics.averagePoints)} pts per submission`}
-              />
-              <MetricCard
-                title="Visits confirmed"
-                value={`${numberFormatter.format(metrics.visited)} (${visitRate.toFixed(0)}%)`}
-                subtitle={`${numberFormatter.format(metrics.notVisited)} awaiting confirmation`}
-              />
-            </section>
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col space-y-8 px-6 py-8">
+          {error && (
+            <div className="glass-card rounded-xl border border-red-400/20 bg-red-500/5 p-4 text-sm text-red-300 animate-scale-in">
+              {error.message ||
+                "Unable to load partner data. Please try again."}
+            </div>
+          )}
 
-            <section className="grid gap-6 xl:grid-cols-3">
-              <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl xl:col-span-2">
-                <CardHeader>
-                  <CardTitle className="text-base text-white">Revenue trend</CardTitle>
-                  <CardDescription>Tracking submissions over time</CardDescription>
-                </CardHeader>
-                <CardContent className="h-[320px] px-0 pb-0">
-                  {loading && revenueTrend.length === 0 ? (
-                    <Skeleton className="h-full w-full bg-white/10" />
-                  ) : revenueTrend.length ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={revenueTrend}>
-                        <XAxis
-                          dataKey="date"
-                          stroke="rgba(148, 163, 184, 0.4)"
-                          tickLine={false}
-                          tick={{ fill: "rgba(226, 232, 240, 0.75)", fontSize: 12 }}
-                        />
-                        <YAxis
-                          stroke="rgba(148, 163, 184, 0.4)"
-                          tickFormatter={(value) =>
-                            currencyFormatter.format(value).replace("$", "")
-                          }
-                          width={60}
-                          tickLine={false}
-                          tick={{ fill: "rgba(226, 232, 240, 0.75)", fontSize: 12 }}
-                        />
-                        <Tooltip
-                          contentStyle={tooltipStyles}
-                          labelStyle={tooltipLabelStyle}
-                          itemStyle={tooltipItemStyle}
-                          formatter={(value) => currencyFormatter.format(value)}
-                          labelFormatter={(label) => `Date: ${label}`}
-                        />
-                        <Legend
-                          wrapperStyle={{
-                            color: "rgba(226, 232, 240, 0.8)",
-                            paddingTop: 12,
+          <section
+            ref={overviewRef}
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 animate-slide-up"
+          >
+            <MetricCard
+              title="Total submissions"
+              value={numberFormatter.format(metrics.count)}
+              subtitle={`${numberFormatter.format(
+                metrics.used
+              )} used • ${numberFormatter.format(metrics.unused)} pending`}
+            />
+            <MetricCard
+              title="Conversion rate"
+              value={`${conversionRate.toFixed(0)}%`}
+              subtitle="Usage of distributed tickets"
+            />
+            <MetricCard
+              title="Total revenue"
+              value={currencyFormatter.format(totalRevenue)}
+              subtitle={`Avg ${currencyFormatterDetailed.format(
+                averageRevenue
+              )} / submission`}
+            />
+            <MetricCard
+              title="Total points"
+              value={numberFormatter.format(points)}
+              subtitle={`Avg ${numberFormatter.format(
+                metrics.averagePoints
+              )} pts per submission`}
+            />
+            <MetricCard
+              title="Visits confirmed"
+              value={`${numberFormatter.format(
+                metrics.visited
+              )} (${visitRate.toFixed(0)}%)`}
+              subtitle={`${numberFormatter.format(
+                metrics.notVisited
+              )} awaiting confirmation`}
+            />
+          </section>
+
+          <section className="grid gap-6 xl:grid-cols-3 animate-scale-in">
+            <Card className="glass-card hover-lift xl:col-span-2 rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-bold text-gradient">
+                  Revenue trend
+                </CardTitle>
+                <CardDescription className="text-muted-foreground text-sm">
+                  Tracking submissions over time
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[320px] px-0 pb-0">
+                {loading && revenueTrend.length === 0 ? (
+                  <Skeleton className="h-full w-full bg-white/10" />
+                ) : revenueTrend.length ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={revenueTrend}>
+                      <XAxis
+                        dataKey="date"
+                        stroke="rgba(148, 163, 184, 0.4)"
+                        tickLine={false}
+                        tick={{
+                          fill: "rgba(226, 232, 240, 0.75)",
+                          fontSize: 12,
+                        }}
+                      />
+                      <YAxis
+                        stroke="rgba(148, 163, 184, 0.4)"
+                        tickFormatter={(value) =>
+                          currencyFormatter.format(value).replace("$", "")
+                        }
+                        width={60}
+                        tickLine={false}
+                        tick={{
+                          fill: "rgba(226, 232, 240, 0.75)",
+                          fontSize: 12,
+                        }}
+                      />
+                      <Tooltip
+                        contentStyle={tooltipStyles}
+                        labelStyle={tooltipLabelStyle}
+                        itemStyle={tooltipItemStyle}
+                        formatter={(value) =>
+                          currencyFormatter.format(Number(value))
+                        }
+                        labelFormatter={(label) => `Date: ${label}`}
+                      />
+                      <Legend
+                        wrapperStyle={{
+                          color: "rgba(226, 232, 240, 0.8)",
+                          paddingTop: 12,
+                        }}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#38bdf8"
+                        strokeWidth={3}
+                        dot={false}
+                        name="Revenue"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                    Not enough data yet.
+                  </div>
+                )}
+              </CardContent>
+              <CardFooter className="flex flex-wrap gap-6 border-t border-white/10 bg-white/[0.04] py-4 text-sm text-slate-300">
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                    Highest booking
+                  </p>
+                  <p className="mt-1 font-medium text-white">
+                    {bestSubmission
+                      ? currencyFormatter.format(bestSubmission.totalPrice || 0)
+                      : "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                    Average value
+                  </p>
+                  <p className="mt-1 font-medium text-white">
+                    {currencyFormatterDetailed.format(averageRevenue)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-slate-500">
+                    Total revenue
+                  </p>
+                  <p className="mt-1 font-medium text-white">
+                    {currencyFormatter.format(totalRevenue)}
+                  </p>
+                </div>
+              </CardFooter>
+            </Card>
+
+            <Card className="glass-card hover-lift rounded-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-bold text-gradient">
+                  Ticket distribution
+                </CardTitle>
+                <CardDescription className="text-muted-foreground text-sm">
+                  Breakdown of submissions by ticket type
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="h-[320px] px-0 pb-0">
+                {loading && pieData.length === 0 ? (
+                  <Skeleton className="h-full w-full bg-white/10" />
+                ) : pieData.length ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={4}
+                        dataKey="value"
+                      >
+                        {pieData.map((entry, index) => (
+                          <Cell
+                            key={entry.name}
+                            fill={COLORS[index % COLORS.length]}
+                          />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        contentStyle={tooltipStyles}
+                        labelStyle={tooltipLabelStyle}
+                        itemStyle={{ color: "#cbd5f5" }}
+                        formatter={(value, name) => [
+                          `${value} submissions`,
+                          name,
+                        ]}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                    Not enough data yet.
+                  </div>
+                )}
+              </CardContent>
+              {topTicketTypes.length ? (
+                <CardFooter className="flex flex-col gap-3 border-t border-white/10 bg-white/[0.04] py-4 text-sm text-slate-300">
+                  {topTicketTypes.map((item, index) => (
+                    <div
+                      key={item.name}
+                      className="flex items-center justify-between gap-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span
+                          className="size-2.5 rounded-full"
+                          style={{
+                            backgroundColor: COLORS[index % COLORS.length],
                           }}
                         />
-                        <Line
-                          type="monotone"
-                          dataKey="revenue"
-                          stroke="#38bdf8"
-                          strokeWidth={3}
-                          dot={false}
-                          name="Revenue"
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                      Not enough data yet.
-                    </div>
-                  )}
-                </CardContent>
-                <CardFooter className="flex flex-wrap gap-6 border-t border-white/10 bg-white/[0.04] py-4 text-sm text-slate-300">
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                      Highest booking
-                    </p>
-                    <p className="mt-1 font-medium text-white">
-                      {bestSubmission
-                        ? currencyFormatter.format(bestSubmission.totalPrice || 0)
-                        : "—"}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                      Average value
-                    </p>
-                    <p className="mt-1 font-medium text-white">
-                      {currencyFormatterDetailed.format(averageRevenue)}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase tracking-wide text-slate-500">
-                      Total revenue
-                    </p>
-                    <p className="mt-1 font-medium text-white">
-                      {currencyFormatter.format(totalRevenue)}
-                    </p>
-                  </div>
-                </CardFooter>
-              </Card>
-
-              <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl">
-                <CardHeader>
-                  <CardTitle className="text-base text-white">
-                    Ticket distribution
-                  </CardTitle>
-                  <CardDescription>
-                    Breakdown of submissions by ticket type
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="h-[320px] px-0 pb-0">
-                  {loading && pieData.length === 0 ? (
-                    <Skeleton className="h-full w-full bg-white/10" />
-                  ) : pieData.length ? (
-                    <ResponsiveContainer width="100%" height="100%">
-                      <PieChart>
-                        <Pie
-                          data={pieData}
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={60}
-                          outerRadius={100}
-                          paddingAngle={4}
-                          dataKey="value"
-                        >
-                          {pieData.map((entry, index) => (
-                            <Cell
-                              key={entry.name}
-                              fill={COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          contentStyle={tooltipStyles}
-                          labelStyle={tooltipLabelStyle}
-                          itemStyle={{ color: "#cbd5f5" }}
-                          formatter={(value, name) => [`${value} submissions`, name]}
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                      Not enough data yet.
-                    </div>
-                  )}
-                </CardContent>
-                {topTicketTypes.length ? (
-                  <CardFooter className="flex flex-col gap-3 border-t border-white/10 bg-white/[0.04] py-4 text-sm text-slate-300">
-                    {topTicketTypes.map((item, index) => (
-                      <div
-                        key={item.name}
-                        className="flex items-center justify-between gap-3"
-                      >
-                        <div className="flex items-center gap-3">
-                          <span
-                            className="size-2.5 rounded-full"
-                            style={{
-                              backgroundColor: COLORS[index % COLORS.length],
-                            }}
-                          />
-                          <span className="font-medium text-white">
-                            {item.name}
-                          </span>
-                        </div>
-                        <span className="text-xs text-slate-400">
-                          {metrics.count
-                            ? `${((item.value / metrics.count) * 100).toFixed(0)}%`
-                            : "0%"}
-                          {" "}• {numberFormatter.format(item.value)} submissions
+                        <span className="font-medium text-white">
+                          {item.name}
                         </span>
                       </div>
-                    ))}
-                  </CardFooter>
-                ) : null}
-              </Card>
-            </section>
+                      <span className="text-xs text-slate-400">
+                        {metrics.count
+                          ? `${((item.value / metrics.count) * 100).toFixed(
+                              0
+                            )}%`
+                          : "0%"}{" "}
+                        • {numberFormatter.format(item.value)} submissions
+                      </span>
+                    </div>
+                  ))}
+                </CardFooter>
+              ) : null}
+            </Card>
+          </section>
 
-            <section ref={submissionsRef}>
-              <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl">
-                <CardHeader className="flex flex-wrap items-center justify-between gap-4 space-y-0">
-                  <div>
-                    <CardTitle className="text-base text-white">
-                      Latest submissions
-                    </CardTitle>
-                    <CardDescription>
-                      Complete feed of partner activity and ticket scans
-                    </CardDescription>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <BadgeWithIcon
-                      icon={Users}
-                      label={`${numberFormatter.format(metrics.count)} total`}
-                    />
-                    <BadgeWithIcon
-                      icon={Activity}
-                      label={`${numberFormatter.format(metrics.used)} used`}
-                    />
-                    <BadgeWithIcon
-                      icon={Ticket}
-                      label={`${numberFormatter.format(metrics.unused)} pending`}
-                    />
-                    <BadgeWithIcon
-                      icon={Award}
-                      label={`${numberFormatter.format(metrics.visited)} visited`}
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4 px-0">
-                  <div className="space-y-3 border-b border-white/10 bg-white/[0.03] px-4 py-4">
-                    <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <section
+            ref={submissionsRef}
+            className="animate-fade-in"
+            style={{ animationDelay: "0.3s" }}
+          >
+            <Card className="glass-card rounded-xl">
+              <CardHeader className="flex flex-wrap items-center justify-between gap-4 space-y-0 pb-4">
+                <div>
+                  <CardTitle className="text-lg font-bold text-gradient">
+                    Latest submissions
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground text-sm">
+                    Complete feed of partner activity and ticket scans
+                  </CardDescription>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <BadgeWithIcon
+                    icon={Users}
+                    label={`${numberFormatter.format(metrics.count)} total`}
+                  />
+                  <BadgeWithIcon
+                    icon={Activity}
+                    label={`${numberFormatter.format(metrics.used)} used`}
+                  />
+                  <BadgeWithIcon
+                    icon={Ticket}
+                    label={`${numberFormatter.format(metrics.unused)} pending`}
+                  />
+                  <BadgeWithIcon
+                    icon={Award}
+                    label={`${numberFormatter.format(metrics.visited)} visited`}
+                  />
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4 px-0">
+                <div className="space-y-3 border-b border-white/10 bg-white/[0.03] px-4 py-4">
+                  <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Search
+                      </label>
+                      <Input
+                        value={filters.search}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                          handleFilterChange("search", event.target.value)
+                        }
+                        placeholder="Search email, category, ticket"
+                        className="bg-slate-950/50 text-white"
+                      />
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Ticket type
+                      </label>
+                      <select
+                        value={filters.ticket}
+                        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                          handleFilterChange("ticket", event.target.value)
+                        }
+                        className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white"
+                      >
+                        <option value="all">All tickets</option>
+                        {availableTickets.map((ticket) => (
+                          <option key={ticket} value={ticket}>
+                            {ticket}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                        Visit status
+                      </label>
+                      <select
+                        value={filters.visited}
+                        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                          handleFilterChange(
+                            "visited",
+                            event.target.value as VisitFilter
+                          )
+                        }
+                        className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white"
+                      >
+                        <option value="all">All</option>
+                        <option value="visited">Visited</option>
+                        <option value="unvisited">Awaiting visit</option>
+                      </select>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
                       <div className="flex flex-col gap-1">
                         <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                          Search
+                          From
                         </label>
                         <Input
-                          value={filters.search}
-                onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                  handleFilterChange("search", event.target.value)
-                }
-                          placeholder="Search email, category, ticket"
-                          className="bg-slate-950/50 text-white"
+                          type="date"
+                          value={filters.startDate}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                            handleFilterChange("startDate", event.target.value)
+                          }
+                          className="bg-slate-950/60 text-white"
                         />
                       </div>
                       <div className="flex flex-col gap-1">
                         <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                          Ticket type
+                          To
                         </label>
-                        <select
-                          value={filters.ticket}
-                  onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                    handleFilterChange("ticket", event.target.value)
-                  }
-                          className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white"
-                        >
-                          <option value="all">All tickets</option>
-                          {availableTickets.map((ticket) => (
-                            <option key={ticket} value={ticket}>
-                              {ticket}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                          Visit status
-                        </label>
-                        <select
-                          value={filters.visited}
-                  onChange={(event: ChangeEvent<HTMLSelectElement>) =>
-                    handleFilterChange("visited", event.target.value as VisitFilter)
-                  }
-                          className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white"
-                        >
-                          <option value="all">All</option>
-                          <option value="visited">Visited</option>
-                          <option value="unvisited">Awaiting visit</option>
-                        </select>
-                      </div>
-                      <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="flex flex-col gap-1">
-                          <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                            From
-                          </label>
-                          <Input
-                            type="date"
-                            value={filters.startDate}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    handleFilterChange("startDate", event.target.value)
-                  }
-                            className="bg-slate-950/60 text-white"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-1">
-                          <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                            To
-                          </label>
-                          <Input
-                            type="date"
-                            value={filters.endDate}
-                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                    handleFilterChange("endDate", event.target.value)
-                  }
-                            className="bg-slate-950/60 text-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <span className="text-xs text-slate-400">
-                        Showing {numberFormatter.format(filteredCount)} of {numberFormatter.format(metrics.count)} submissions
-                      </span>
-                      <div className="flex flex-wrap gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn("gap-1", secondaryButtonClass)}
-                          onClick={handleResetFilters}
-                        >
-                          Reset filters
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className={cn("gap-2", primaryButtonClass)}
-                          onClick={handleExport}
-                          disabled={filteredSubmissions.length === 0}
-                        >
-                          <Download className="size-4" /> Export CSV
-                        </Button>
+                        <Input
+                          type="date"
+                          value={filters.endDate}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                            handleFilterChange("endDate", event.target.value)
+                          }
+                          className="bg-slate-950/60 text-white"
+                        />
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <span className="text-xs text-slate-400">
+                      Showing {numberFormatter.format(filteredCount)} of{" "}
+                      {numberFormatter.format(metrics.count)} submissions
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn("gap-1", secondaryButtonClass)}
+                        onClick={handleResetFilters}
+                      >
+                        Reset filters
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn("gap-2", primaryButtonClass)}
+                        onClick={handleExport}
+                        disabled={filteredSubmissions.length === 0}
+                      >
+                        <Download className="size-4" /> Export CSV
+                      </Button>
+                    </div>
+                  </div>
+                </div>
 
-                  <SubmissionsTable
-                    submissions={filteredSubmissions}
-                    isLoading={loading && submissions.length === 0}
-                    onToggleVisited={handleToggleVisited}
-                    visitUpdating={visitUpdating}
-                  />
-                </CardContent>
-              </Card>
-            </section>
-          </main>
-        </div>
+                <SubmissionsTable
+                  submissions={filteredSubmissions}
+                  isLoading={loading && submissions.length === 0}
+                  onToggleVisited={handleToggleVisited}
+                  visitUpdating={visitUpdating}
+                />
+              </CardContent>
+            </Card>
+          </section>
+        </main>
       </div>
     </div>
   );
 }
 
-function MetricCard({ title, value, subtitle }) {
-  return (
-    <Card className="border-white/10 bg-white/[0.06] backdrop-blur transition hover:border-white/20 hover:bg-white/[0.09]">
-      <CardContent className="p-6">
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-            {title}
-          </p>
-          <p className="text-3xl font-semibold text-white">{value}</p>
-          {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-function BadgeWithIcon({ icon, label }) {
+function BadgeWithIcon({
+  icon,
+  label,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+}) {
   const Icon = icon;
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-slate-200">
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 hover:bg-white/10 transition-colors">
       <Icon className="size-3" />
       {label}
     </span>

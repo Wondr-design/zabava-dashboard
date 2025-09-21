@@ -99,27 +99,36 @@ function InviteRow({ invite, onCopyLink, onCopyToken }: InviteRowProps): JSX.Ele
   const expiresLabel = formatCountdown(invite.expiresAt);
 
   return (
-    <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/[0.06] p-5 shadow-[0_20px_40px_rgba(8,11,20,0.45)] backdrop-blur">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="truncate text-base font-semibold text-white">
-            {invite.email || "(no email)"}
-          </p>
-          <p className="truncate text-sm text-slate-300">
-            {invite.name ? invite.name : "Partner contact"}
-          </p>
+    <div className="group grid gap-5 rounded-xl border border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] p-6 shadow-xl backdrop-blur-xl hover:shadow-2xl hover:border-white/30 transition-all duration-300 overflow-hidden relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <div className="flex flex-wrap items-center justify-between gap-4 relative z-10">
+        <div className="min-w-0 flex items-center gap-4">
+          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-lg">
+              {invite.email ? invite.email.charAt(0).toUpperCase() : "?"}
+            </span>
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-base font-semibold text-white group-hover:text-blue-100 transition-colors">
+              {invite.email || "(no email)"}
+            </p>
+            <p className="truncate text-sm text-slate-300 group-hover:text-slate-200 transition-colors">
+              {invite.name ? invite.name : "Partner contact"}
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className={`rounded-full border px-3 py-1 text-xs font-medium ${statusStyles}`}>
+        <div className="flex flex-wrap items-center gap-3">
+          <span className={`rounded-lg border px-3 py-1.5 text-xs font-semibold shadow-sm ${statusStyles}`}>
+            <div className={`inline-block h-1.5 w-1.5 rounded-full mr-2 ${isUsed ? "bg-emerald-400" : "bg-amber-400"}`}></div>
             {statusLabel}
           </span>
-          <Badge variant="outline" className="border-white/15 bg-white/[0.05] text-slate-200">
+          <Badge variant="outline" className="border-white/20 bg-white/[0.08] text-slate-100 font-medium px-3 py-1">
             {(invite.partnerId || "").toString().toUpperCase() || "—"}
           </Badge>
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
         <InviteDetail title="Created" value={formatDate(invite.createdAt)} />
         <InviteDetail title="Expires" value={formatDate(invite.expiresAt)} highlight={expiresSoon} />
         <InviteDetail title="Time remaining" value={expiresLabel} highlight={expiresSoon && !isUsed} />
@@ -130,29 +139,29 @@ function InviteRow({ invite, onCopyLink, onCopyToken }: InviteRowProps): JSX.Ele
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-3 relative z-10">
         <Button
           size="sm"
           variant="outline"
-          className={cn("gap-2", PRIMARY_BUTTON_CLASS)}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-700 hover:to-purple-700 shadow-md font-medium px-4 py-2 rounded-lg transition-all duration-200"
           onClick={() => onCopyLink(invite)}
         >
-          <Link2 className="size-4" /> Copy invite link
+          <Link2 className="size-4 mr-2" /> Copy invite link
         </Button>
         <Button
           size="sm"
           variant="outline"
-          className={cn("gap-2", SECONDARY_BUTTON_CLASS)}
+          className="bg-white/10 text-white border border-white/30 hover:bg-white/20 hover:border-white/50 shadow-sm font-medium px-4 py-2 rounded-lg transition-all duration-200"
           onClick={() => onCopyToken(invite.token)}
         >
-          <Copy className="size-4" /> Copy token
+          <Copy className="size-4 mr-2" /> Copy token
         </Button>
         {invite.inviteUrl ? (
           <a
             href={invite.inviteUrl}
             target="_blank"
             rel="noreferrer"
-            className="text-xs text-slate-400 underline-offset-2 hover:text-slate-200 hover:underline"
+            className="text-sm text-slate-300 underline-offset-2 hover:text-blue-300 hover:underline transition-colors font-medium"
           >
             Open invite
           </a>
@@ -164,11 +173,17 @@ function InviteRow({ invite, onCopyLink, onCopyToken }: InviteRowProps): JSX.Ele
 
 function InviteDetail({ title, value, highlight }: InviteDetailProps): JSX.Element {
   return (
-    <div className="rounded-xl border border-white/5 bg-white/[0.04] px-3 py-2 text-xs text-slate-400">
-      <p className="uppercase tracking-[0.2em] text-slate-500">{title}</p>
+    <div className={`rounded-lg border px-4 py-3 text-xs shadow-sm backdrop-blur-sm transition-all duration-200 ${
+      highlight 
+        ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-100" 
+        : "border-white/20 bg-white/[0.08] text-slate-300"
+    }`}>
+      <p className={`uppercase tracking-widest font-semibold ${
+        highlight ? "text-emerald-200" : "text-slate-400"
+      }`}>{title}</p>
       <p
-        className={`mt-1 truncate text-sm ${
-          highlight ? "text-emerald-200" : "text-slate-200"
+        className={`mt-2 truncate text-sm font-medium ${
+          highlight ? "text-emerald-100" : "text-slate-100"
         }`}
       >
         {value}
@@ -395,22 +410,37 @@ export default function InviteManager(): JSX.Element {
 
   const statusAlert = message ? (
     <div
-      className={`rounded-2xl border px-4 py-3 text-sm shadow-[0_12px_30px_rgba(15,23,42,0.35)] ${
+      className={`rounded-xl border px-5 py-4 text-sm font-medium shadow-lg backdrop-blur-sm animate-in fade-in-0 slide-in-from-top-2 duration-300 ${
         message.type === "success"
-          ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-          : "border-rose-500/40 bg-rose-500/10 text-rose-200"
+          ? "border-emerald-500/40 bg-gradient-to-r from-emerald-500/20 to-emerald-500/10 text-emerald-100"
+          : "border-rose-500/40 bg-gradient-to-r from-rose-500/20 to-rose-500/10 text-rose-100"
       }`}
     >
-      {message.text}
+      <div className="flex items-center gap-2">
+        <div className={`h-2 w-2 rounded-full ${
+          message.type === "success" ? "bg-emerald-400" : "bg-rose-400"
+        } animate-pulse`}></div>
+        {message.text}
+      </div>
     </div>
   ) : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-10">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 relative overflow-hidden">
+      {/* Subtle background effects */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5"></div>
+      <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/3 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
+      <div className="relative z-10 py-12">
+        <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-6">
         <header className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold text-white">Partner invites</h1>
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">Z</span>
+              </div>
+              <h1 className="text-3xl font-bold text-white tracking-tight">Partner invites</h1>
+            </div>
             <p className="max-w-2xl text-sm text-slate-300">
               Generate one-time signup links for partner contacts. Invites automatically switch to
               <span className="text-emerald-300"> “used”</span> once the partner completes their registration.
@@ -424,7 +454,7 @@ export default function InviteManager(): JSX.Element {
           <div className="flex flex-wrap items-center gap-3">
             <Button
               variant="outline"
-              className={cn("gap-2", PRIMARY_BUTTON_CLASS)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-700 hover:to-purple-700 shadow-lg font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
               onClick={() => refreshInvites()}
               disabled={loadingInvites || refreshingInvites}
             >
@@ -433,7 +463,7 @@ export default function InviteManager(): JSX.Element {
             </Button>
             <Button
               variant="outline"
-              className={cn("gap-2", SECONDARY_BUTTON_CLASS)}
+              className="bg-white/10 text-white border border-white/30 hover:bg-white/20 hover:border-white/50 shadow-md font-medium px-4 py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50"
               onClick={() => setPartnersRefreshIndex((prev) => prev + 1)}
               disabled={loadingPartners}
             >
@@ -442,7 +472,7 @@ export default function InviteManager(): JSX.Element {
             </Button>
             <Button
               variant="outline"
-              className={cn(SECONDARY_BUTTON_CLASS)}
+              className="bg-white/10 text-white border border-white/30 hover:bg-white/20 hover:border-white/50 shadow-md font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
               onClick={() => navigate("/admin/dashboard")}
             >
               View analytics
@@ -453,18 +483,19 @@ export default function InviteManager(): JSX.Element {
         {statusAlert}
 
         <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
-          <Card className="border-white/10 bg-white/[0.07] backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-lg text-white">Create invite</CardTitle>
-              <CardDescription>
+          <Card className="group border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 overflow-hidden relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <CardHeader className="relative z-10">
+              <CardTitle className="text-xl font-semibold text-white group-hover:text-blue-100 transition-colors">Create invite</CardTitle>
+              <CardDescription className="text-slate-400 group-hover:text-slate-300 transition-colors">
                 Complete the form to issue a single-use signup link. You can pre-select partners or input a custom ID.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <form className="grid gap-4" onSubmit={createInvite}>
-                <div className="grid gap-3">
-                  <Label className="text-xs uppercase tracking-[0.25em] text-slate-400">Partner</Label>
-                  <div className="grid gap-3 rounded-2xl border border-white/10 bg-white/[0.05] p-4">
+            <CardContent className="relative z-10">
+              <form className="grid gap-6" onSubmit={createInvite}>
+                <div className="grid gap-4">
+                  <Label className="text-sm font-semibold uppercase tracking-widest text-slate-300">Partner</Label>
+                  <div className="grid gap-4 rounded-xl border border-white/20 bg-white/[0.08] p-5 shadow-inner backdrop-blur-sm">
                     <div className="flex flex-col gap-2">
                       <select
                         value={selectedPartner}
@@ -472,7 +503,7 @@ export default function InviteManager(): JSX.Element {
                           setSelectedPartner(event.target.value)
                         }
                         disabled={loadingPartners || !partners.length || useCustomPartner}
-                        className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:text-slate-500"
+                        className="rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-sm text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 disabled:cursor-not-allowed disabled:text-slate-500 disabled:opacity-60"
                       >
                         {partners.length === 0 ? (
                           <option value="">
@@ -492,10 +523,10 @@ export default function InviteManager(): JSX.Element {
                       </p>
                     </div>
                     <div className="flex flex-col gap-2">
-                      <label className="flex items-center gap-2 text-xs text-slate-300">
+                      <label className="flex items-center gap-3 text-sm text-slate-200 cursor-pointer">
                         <input
                           type="checkbox"
-                          className="size-4 rounded border-white/30 bg-white/10"
+                          className="size-4 rounded border-white/30 bg-white/10 text-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                           checked={useCustomPartner}
                           onChange={(event: ChangeEvent<HTMLInputElement>) =>
                             setUseCustomPartner(event.target.checked)
@@ -510,14 +541,14 @@ export default function InviteManager(): JSX.Element {
                         }
                         placeholder="e.g. LZ001"
                         disabled={!useCustomPartner}
-                        className="bg-slate-950/60 text-white disabled:cursor-not-allowed disabled:text-slate-500"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg shadow-sm disabled:cursor-not-allowed disabled:text-slate-500 disabled:opacity-60"
                       />
                     </div>
                   </div>
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="invite-email">Email</Label>
+                <div className="grid gap-3">
+                  <Label htmlFor="invite-email" className="text-sm font-semibold text-slate-300">Email</Label>
                   <Input
                     id="invite-email"
                     type="email"
@@ -526,12 +557,12 @@ export default function InviteManager(): JSX.Element {
                     onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       setEmail(event.target.value)
                     }
-                    className="bg-slate-950/60 text-white"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg shadow-sm py-3"
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="invite-name">Contact name (optional)</Label>
+                <div className="grid gap-3">
+                  <Label htmlFor="invite-name" className="text-sm font-semibold text-slate-300">Contact name (optional)</Label>
                   <Input
                     id="invite-name"
                     type="text"
@@ -540,12 +571,12 @@ export default function InviteManager(): JSX.Element {
                     onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       setName(event.target.value)
                     }
-                    className="bg-slate-950/60 text-white"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg shadow-sm py-3"
                   />
                 </div>
 
-                <div className="grid gap-2">
-                  <Label htmlFor="invite-expiry">Expires in minutes</Label>
+                <div className="grid gap-3">
+                  <Label htmlFor="invite-expiry" className="text-sm font-semibold text-slate-300">Expires in minutes</Label>
                   <Input
                     id="invite-expiry"
                     type="number"
@@ -555,9 +586,9 @@ export default function InviteManager(): JSX.Element {
                     onChange={(event: ChangeEvent<HTMLInputElement>) =>
                       setExpiresIn(event.target.value)
                     }
-                    className="bg-slate-950/60 text-white"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg shadow-sm py-3"
                   />
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs text-slate-400">
                     Default is 7 days (10,080 minutes). Shorten this for sensitive access windows.
                   </p>
                 </div>
@@ -565,11 +596,11 @@ export default function InviteManager(): JSX.Element {
                 <Button
                   type="submit"
                   disabled={isSubmitting || loadingPartners}
-                  className={cn("gap-2", PRIMARY_BUTTON_CLASS)}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0 hover:from-emerald-700 hover:to-teal-700 shadow-lg font-semibold px-6 py-3 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting ? (
                     <>
-                      <Loader2 className="size-4 animate-spin" /> Generating invite…
+                      <Loader2 className="size-4 animate-spin mr-2" /> Generating invite…
                     </>
                   ) : (
                     "Generate invite"
@@ -577,17 +608,18 @@ export default function InviteManager(): JSX.Element {
                 </Button>
               </form>
             </CardContent>
-            <CardFooter className="text-xs text-slate-500">
+            <CardFooter className="text-xs text-slate-400 relative z-10">
               Invites are single-use. When the partner finishes signup, the row below flips to “Used” automatically.
             </CardFooter>
           </Card>
 
-          <Card className="border-white/10 bg-white/[0.05] backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Invite activity</CardTitle>
-              <CardDescription>Monitor pending access and quick stats.</CardDescription>
+          <Card className="group border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 overflow-hidden relative p-6 hover:p-7">
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <CardHeader className="relative z-10 -m-6 mb-0 p-6">
+              <CardTitle className="text-lg font-semibold text-white group-hover:text-blue-100 transition-colors">Invite activity</CardTitle>
+              <CardDescription className="text-slate-400 group-hover:text-slate-300 transition-colors">Monitor pending access and quick stats.</CardDescription>
             </CardHeader>
-            <CardContent className="grid gap-4">
+            <CardContent className="grid gap-4 relative z-10 -m-6 mt-0 p-6">
               <SummaryStat
                 label="Pending"
                 value={numberFormatter.format(inviteStats.pending)}
@@ -603,9 +635,9 @@ export default function InviteManager(): JSX.Element {
                 value={numberFormatter.format(inviteStats.expiringSoon)}
                 tone="warning"
               />
-              <div className="rounded-xl border border-white/5 bg-white/[0.03] px-4 py-3 text-xs text-slate-400">
-                <p className="font-medium text-slate-200">Need to resend?</p>
-                <p className="mt-1">
+              <div className="rounded-xl border border-white/20 bg-white/[0.08] px-4 py-4 text-sm text-slate-300 shadow-inner backdrop-blur-sm">
+                <p className="font-semibold text-slate-100 mb-2">Need to resend?</p>
+                <p className="leading-relaxed">
                   You can reuse an invite token until it is marked “used”. For a fresh link, generate a new invite—old
                   links automatically expire after their cutoff.
                 </p>
@@ -649,6 +681,7 @@ export default function InviteManager(): JSX.Element {
             </div>
           )}
         </section>
+        </div>
       </div>
     </div>
   );
@@ -656,14 +689,24 @@ export default function InviteManager(): JSX.Element {
 
 function SummaryStat({ label, value, tone }: SummaryStatProps): JSX.Element {
   const toneClasses = {
-    pending: "border-amber-500/30 bg-amber-500/10 text-amber-100",
-    used: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
-    warning: "border-rose-500/30 bg-rose-500/10 text-rose-200",
+    pending: "border-amber-500/40 bg-gradient-to-br from-amber-500/20 to-amber-500/10 text-amber-100 shadow-amber-500/10",
+    used: "border-emerald-500/40 bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 text-emerald-200 shadow-emerald-500/10",
+    warning: "border-rose-500/40 bg-gradient-to-br from-rose-500/20 to-rose-500/10 text-rose-200 shadow-rose-500/10",
   };
+  
+  const iconClasses = {
+    pending: "bg-amber-400",
+    used: "bg-emerald-400",
+    warning: "bg-rose-400",
+  };
+  
   return (
-    <div className={`rounded-2xl border px-4 py-4 text-sm font-medium ${toneClasses[tone]}`}>
-      <p className="text-xs uppercase tracking-[0.24em] text-white/70">{label}</p>
-      <p className="mt-1 text-2xl text-white">{value}</p>
+    <div className={`group rounded-xl border px-5 py-5 text-sm font-medium shadow-lg backdrop-blur-sm transition-all duration-200 hover:scale-105 hover:shadow-xl ${toneClasses[tone]}`}>
+      <div className="flex items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-white/80 font-semibold">{label}</p>
+        <div className={`h-2 w-2 rounded-full ${iconClasses[tone]} animate-pulse`}></div>
+      </div>
+      <p className="mt-3 text-2xl font-bold text-white group-hover:scale-110 transition-transform duration-200">{value}</p>
     </div>
   );
 }

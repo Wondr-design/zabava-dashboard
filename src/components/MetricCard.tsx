@@ -4,17 +4,34 @@ export interface MetricCardProps {
   title: string;
   value: string;
   subtitle?: string;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export function MetricCard({ title, value, subtitle }: MetricCardProps): JSX.Element {
+export function MetricCard({
+  title,
+  value,
+  subtitle,
+  className = "",
+  style,
+}: MetricCardProps) {
   return (
-    <Card className="bg-white/90 shadow-md border border-gray-200 hover:scale-[1.02] transition-transform">
-      <CardHeader>
-        <CardTitle className="text-sm text-gray-500">{title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <p className="text-2xl font-bold">{value}</p>
-        {subtitle ? <p className="text-xs text-gray-400">{subtitle}</p> : null}
+    <Card
+      className={`glass-card hover-lift rounded-2xl ${className}`}
+      style={style}
+    >
+      <CardContent className="p-6">
+        <div className="space-y-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            {title}
+          </p>
+          <p className="text-3xl font-bold text-gradient">{value}</p>
+          {subtitle && (
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {subtitle}
+            </p>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

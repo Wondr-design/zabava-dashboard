@@ -8,7 +8,7 @@ import InviteManager from "./pages/admin/InviteManager";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
-function App(): JSX.Element {
+function App() {
   return (
     <BrowserRouter>
       <Routes>
