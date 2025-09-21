@@ -1,9 +1,12 @@
-// src/components/PrivateRoute.jsx
-import React from "react";
+import type { ReactElement } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
-function PrivateRoute({ children }) {
+interface PrivateRouteProps {
+  children: ReactElement;
+}
+
+function PrivateRoute({ children }: PrivateRouteProps): ReactElement {
   const { isAuthenticated, loading, user } = useAuth();
 
   if (loading) {

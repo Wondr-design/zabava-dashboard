@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ChangeEvent, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -13,15 +13,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
-export default function AdminLogin() {
+export default function AdminLogin(): JSX.Element {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSubmitting) return;
 
@@ -34,14 +34,18 @@ export default function AdminLogin() {
 
     setIsSubmitting(true);
     try {
-      const payload = await login({ email: email.trim().toLowerCase(), password });
+      const payload = await login({
+        email: email.trim().toLowerCase(),
+        password,
+      });
       if (payload?.user?.role !== "admin") {
         setError("This account is not authorized for admin access.");
         return;
       }
       navigate("/admin/dashboard", { replace: true });
     } catch (err) {
-      setError(err.message || "Unable to sign in");
+      const errorInstance = err as Error;
+      setError(errorInstance.message || "Unable to sign in");
     } finally {
       setIsSubmitting(false);
     }
@@ -68,7 +72,9 @@ export default function AdminLogin() {
                 placeholder="admin@example.com"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => setEmail(event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setEmail(event.target.value)
+                }
                 className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
               />
             </div>
@@ -82,7 +88,9 @@ export default function AdminLogin() {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 value={password}
-                onChange={(event) => setPassword(event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  setPassword(event.target.value)
+                }
                 className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
               />
             </div>

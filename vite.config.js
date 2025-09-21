@@ -1,3 +1,4 @@
+import process from "node:process";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import tailwindcss from "@tailwindcss/vite";
@@ -17,5 +18,12 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    proxy: {
+      "/api": {
+        target: process.env.VITE_DEV_API_PROXY || "https://zabava-server.vercel.app",
+        changeOrigin: true,
+        secure: false,
+      },
+    },
   },
 });

@@ -1,4 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Card,
@@ -13,7 +19,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Signup() {
+export default function Signup(): JSX.Element {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signup, isAuthenticated } = useAuth();
@@ -31,13 +37,13 @@ export default function Signup() {
     [searchParams]
   );
 
-  const [email, setEmail] = useState(presetEmail);
-  const [name, setName] = useState(presetName);
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState(presetToken);
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState<string>(presetEmail);
+  const [name, setName] = useState<string>(presetName);
+  const [password, setPassword] = useState<string>("");
+  const [confirmPassword, setConfirmPassword] = useState<string>("");
+  const [token, setToken] = useState<string>(presetToken);
+  const [error, setError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -45,7 +51,7 @@ export default function Signup() {
     }
   }, [isAuthenticated, navigate]);
 
-  const handleSubmit = async (event) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSubmitting) {
       return;
@@ -83,7 +89,8 @@ export default function Signup() {
         name: name.trim(),
       });
       navigate("/dashboard", { replace: true });
-    } catch (err) {
+    } catch (unknownError) {
+      const err = unknownError as Error;
       setError(err.message || "Unable to complete signup.");
     } finally {
       setIsSubmitting(false);
@@ -110,7 +117,7 @@ export default function Signup() {
                 type="text"
                 placeholder="Paste your invite token"
                 value={token}
-                onChange={(event) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setToken(event.target.value);
                   if (error) {
                     setError("");
@@ -130,7 +137,7 @@ export default function Signup() {
                 placeholder="partner@example.com"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setEmail(event.target.value);
                   if (error) {
                     setError("");
@@ -149,7 +156,9 @@ export default function Signup() {
                 placeholder="Full name"
                 autoComplete="name"
                 value={name}
-                onChange={(event) => setName(event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
+                  setName(event.target.value);
+                }}
                 className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
               />
             </div>
@@ -163,7 +172,7 @@ export default function Signup() {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 value={password}
-                onChange={(event) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setPassword(event.target.value);
                   if (error) {
                     setError("");
@@ -182,7 +191,7 @@ export default function Signup() {
                 placeholder="••••••••"
                 autoComplete="new-password"
                 value={confirmPassword}
-                onChange={(event) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setConfirmPassword(event.target.value);
                   if (error) {
                     setError("");
@@ -191,11 +200,11 @@ export default function Signup() {
                 className="border-white/15 bg-white/[0.06] text-white placeholder:text-slate-400 focus-visible:border-white/40 focus-visible:ring-white/20"
               />
             </div>
-            {error && (
+            {error ? (
               <p className="text-sm text-rose-300" role="alert">
                 {error}
               </p>
-            )}
+            ) : null}
             <Button
               type="submit"
               className="w-full bg-emerald-500 text-slate-950 hover:bg-emerald-400"
@@ -207,7 +216,7 @@ export default function Signup() {
         </CardContent>
         <CardFooter className="block text-left text-xs text-slate-400">
           <p>
-            Already have access? {" "}
+            Already have access?{" "}
             <Link to="/login" className="text-sky-300 underline">
               Sign in
             </Link>

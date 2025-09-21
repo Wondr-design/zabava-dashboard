@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { Copy, Link2, Loader2, RefreshCw } from "lucide-react";
 import {
@@ -14,12 +21,48 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
-import { API_BASE_URL } from "@/lib/config";
+import { API_BASE_URL, buildApiUrl } from "@/lib/config";
 import { cn } from "@/lib/utils";
+import type {
+  AdminInvite,
+  AnalyticsPartnerOption,
+  InviteSummaryMessage,
+} from "@/types/dashboard";
 
-function formatDate(iso) {
+const PRIMARY_BUTTON_CLASS = "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
+const SECONDARY_BUTTON_CLASS = "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
+
+interface InviteRowProps {
+  invite: AdminInvite;
+  onCopyLink: (invite: AdminInvite) => void;
+  onCopyToken: (token: string) => void;
+}
+
+interface InviteDetailProps {
+  title: string;
+  value: string;
+  highlight?: boolean;
+}
+
+interface SummaryStatProps {
+  label: string;
+  value: string;
+  tone: "pending" | "used" | "warning";
+}
+
+interface RefreshInvitesOptions {
+  silent?: boolean;
+  signal?: AbortSignal;
+}
+
+interface PartnerOption extends AnalyticsPartnerOption {
+  metrics?: { count?: number };
+  lastSubmissionAt?: string | null;
+}
+
+function formatDate(iso?: string | Date | null): string {
   if (!iso) return "—";
-  const date = new Date(iso);
+  const date = iso instanceof Date ? iso : new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
   return date.toLocaleString(undefined, {
     dateStyle: "medium",
@@ -27,7 +70,7 @@ function formatDate(iso) {
   });
 }
 
-function formatCountdown(iso) {
+function formatCountdown(iso?: string | null): string {
   if (!iso) return "—";
   const expires = new Date(iso).getTime();
   if (Number.isNaN(expires)) return "—";
@@ -46,10 +89,7 @@ function formatCountdown(iso) {
   return `${mins}m`;
 }
 
-const PRIMARY_BUTTON_CLASS = "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
-const SECONDARY_BUTTON_CLASS = "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
-
-function InviteRow({ invite, onCopyLink, onCopyToken }) {
+function InviteRow({ invite, onCopyLink, onCopyToken }: InviteRowProps): JSX.Element {
   const isUsed = invite.used;
   const statusStyles = isUsed
     ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-200"
@@ -122,7 +162,7 @@ function InviteRow({ invite, onCopyLink, onCopyToken }) {
   );
 }
 
-function InviteDetail({ title, value, highlight }) {
+function InviteDetail({ title, value, highlight }: InviteDetailProps): JSX.Element {
   return (
     <div className="rounded-xl border border-white/5 bg-white/[0.04] px-3 py-2 text-xs text-slate-400">
       <p className="uppercase tracking-[0.2em] text-slate-500">{title}</p>
@@ -137,26 +177,26 @@ function InviteDetail({ title, value, highlight }) {
   );
 }
 
-export default function InviteManager() {
+export default function InviteManager(): JSX.Element {
   const navigate = useNavigate();
   const { isAuthenticated, user, token } = useAuth();
   const isAdmin = user?.role === "admin";
 
-  const [partners, setPartners] = useState([]);
-  const [selectedPartner, setSelectedPartner] = useState("");
-  const [useCustomPartner, setUseCustomPartner] = useState(false);
-  const [customPartnerId, setCustomPartnerId] = useState("");
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [expiresIn, setExpiresIn] = useState("10080");
-  const [invites, setInvites] = useState([]);
-  const [loadingPartners, setLoadingPartners] = useState(false);
-  const [loadingInvites, setLoadingInvites] = useState(false);
-  const [refreshingInvites, setRefreshingInvites] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [partnersRefreshIndex, setPartnersRefreshIndex] = useState(0);
-  const [lastFetchedAt, setLastFetchedAt] = useState(null);
+  const [partners, setPartners] = useState<PartnerOption[]>([]);
+  const [selectedPartner, setSelectedPartner] = useState<string>("");
+  const [useCustomPartner, setUseCustomPartner] = useState<boolean>(false);
+  const [customPartnerId, setCustomPartnerId] = useState<string>("");
+  const [email, setEmail] = useState<string>("");
+  const [name, setName] = useState<string>("");
+  const [expiresIn, setExpiresIn] = useState<string>("10080");
+  const [invites, setInvites] = useState<AdminInvite[]>([]);
+  const [loadingPartners, setLoadingPartners] = useState<boolean>(false);
+  const [loadingInvites, setLoadingInvites] = useState<boolean>(false);
+  const [refreshingInvites, setRefreshingInvites] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [message, setMessage] = useState<InviteSummaryMessage | null>(null);
+  const [partnersRefreshIndex, setPartnersRefreshIndex] = useState<number>(0);
+  const [lastFetchedAt, setLastFetchedAt] = useState<Date | null>(null);
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
@@ -179,7 +219,7 @@ export default function InviteManager() {
   }, [isAuthenticated, isAdmin, navigate]);
 
   const refreshInvites = useCallback(
-    async ({ silent = false, signal } = {}) => {
+    async ({ silent = false, signal }: RefreshInvitesOptions = {}): Promise<void> => {
       if (!isAdmin || !token) return;
       if (silent) {
         setRefreshingInvites(true);
@@ -187,7 +227,7 @@ export default function InviteManager() {
         setLoadingInvites(true);
       }
       try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/invites`, {
+        const response = await fetch(buildApiUrl("/api/admin/invites"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -196,16 +236,20 @@ export default function InviteManager() {
         if (!response.ok) {
           throw new Error(`Failed to load invites: ${response.status}`);
         }
-        const payload = await response.json();
-        const list = (payload.items || []).sort(
-          (a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0)
-        );
+        const payload = (await response.json()) as { items?: AdminInvite[] };
+        const list = (payload.items || [])
+          .map((item) => ({ ...item }))
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime()
+          );
         setInvites(list);
         setLastFetchedAt(new Date());
-      } catch (err) {
+      } catch (unknownError) {
+        const err = unknownError as Error & { name?: string };
         if (err.name === "AbortError") return;
         console.error(err);
-        setMessage({ type: "error", text: err.message });
+        setMessage({ type: "error", text: err.message || "Failed to load invites." });
       } finally {
         if (silent) {
           setRefreshingInvites(false);
@@ -221,10 +265,10 @@ export default function InviteManager() {
     if (!isAdmin || !token) return;
     let abort = false;
     const controller = new AbortController();
-    async function fetchPartners() {
+    async function fetchPartners(): Promise<void> {
       setLoadingPartners(true);
       try {
-        const response = await fetch(`${API_BASE_URL}/api/admin/analytics?mode=metrics`, {
+        const response = await fetch(buildApiUrl("/api/admin/analytics", { mode: "metrics" }), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -233,7 +277,7 @@ export default function InviteManager() {
         if (!response.ok) {
           throw new Error(`Failed to load partners: ${response.status}`);
         }
-        const payload = await response.json();
+        const payload = (await response.json()) as { partners?: AnalyticsPartnerOption[] };
         if (abort) return;
         const items = (payload.partners || []).map((record) => ({
           id: (record.id || "").toLowerCase(),
@@ -245,17 +289,18 @@ export default function InviteManager() {
         if (!useCustomPartner && items.length && !selectedPartner) {
           setSelectedPartner(items[0].id);
         }
-      } catch (err) {
+      } catch (unknownError) {
+        const err = unknownError as Error & { name?: string };
         if (err.name === "AbortError") return;
         console.error(err);
-        setMessage({ type: "error", text: err.message });
+        setMessage({ type: "error", text: err.message || "Failed to load partners." });
       } finally {
         if (!abort) {
           setLoadingPartners(false);
         }
       }
     }
-    fetchPartners();
+    void fetchPartners();
     return () => {
       abort = true;
       controller.abort();
@@ -298,7 +343,7 @@ export default function InviteManager() {
     handleCopy(invite.inviteUrl || fallbackUrl);
   };
 
-  const createInvite = async (event) => {
+  const createInvite = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage(null);
     const partnerIdToUse = useCustomPartner
@@ -339,9 +384,10 @@ export default function InviteManager() {
       }
       setMessage({ type: "success", text: "Invite created." });
       await refreshInvites({ silent: true });
-    } catch (err) {
+    } catch (unknownError) {
+      const err = unknownError as Error;
       console.error(err);
-      setMessage({ type: "error", text: err.message });
+      setMessage({ type: "error", text: err.message || "Failed to create invite." });
     } finally {
       setIsSubmitting(false);
     }
@@ -422,7 +468,9 @@ export default function InviteManager() {
                     <div className="flex flex-col gap-2">
                       <select
                         value={selectedPartner}
-                        onChange={(event) => setSelectedPartner(event.target.value)}
+                        onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                          setSelectedPartner(event.target.value)
+                        }
                         disabled={loadingPartners || !partners.length || useCustomPartner}
                         className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white disabled:cursor-not-allowed disabled:text-slate-500"
                       >
@@ -449,13 +497,17 @@ export default function InviteManager() {
                           type="checkbox"
                           className="size-4 rounded border-white/30 bg-white/10"
                           checked={useCustomPartner}
-                          onChange={(event) => setUseCustomPartner(event.target.checked)}
+                          onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                            setUseCustomPartner(event.target.checked)
+                          }
                         />
                         Enter custom partner ID
                       </label>
                       <Input
                         value={customPartnerId}
-                        onChange={(event) => setCustomPartnerId(event.target.value.toUpperCase())}
+                        onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                          setCustomPartnerId(event.target.value.toUpperCase())
+                        }
                         placeholder="e.g. LZ001"
                         disabled={!useCustomPartner}
                         className="bg-slate-950/60 text-white disabled:cursor-not-allowed disabled:text-slate-500"
@@ -471,7 +523,9 @@ export default function InviteManager() {
                     type="email"
                     placeholder="partner@example.com"
                     value={email}
-                    onChange={(event) => setEmail(event.target.value)}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      setEmail(event.target.value)
+                    }
                     className="bg-slate-950/60 text-white"
                   />
                 </div>
@@ -483,7 +537,9 @@ export default function InviteManager() {
                     type="text"
                     placeholder="Contact name"
                     value={name}
-                    onChange={(event) => setName(event.target.value)}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      setName(event.target.value)
+                    }
                     className="bg-slate-950/60 text-white"
                   />
                 </div>
@@ -496,7 +552,9 @@ export default function InviteManager() {
                     min="30"
                     max="43200"
                     value={expiresIn}
-                    onChange={(event) => setExpiresIn(event.target.value)}
+                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                      setExpiresIn(event.target.value)
+                    }
                     className="bg-slate-950/60 text-white"
                   />
                   <p className="text-xs text-slate-500">
@@ -596,7 +654,7 @@ export default function InviteManager() {
   );
 }
 
-function SummaryStat({ label, value, tone }) {
+function SummaryStat({ label, value, tone }: SummaryStatProps): JSX.Element {
   const toneClasses = {
     pending: "border-amber-500/30 bg-amber-500/10 text-amber-100",
     used: "border-emerald-500/30 bg-emerald-500/10 text-emerald-200",
