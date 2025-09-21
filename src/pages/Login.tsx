@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ChangeEvent, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   Card,
@@ -13,13 +13,18 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Login() {
+interface DemoAccount {
+  email?: string;
+  password?: string;
+}
+
+export default function Login(): JSX.Element {
   const navigate = useNavigate();
   const { login, isAuthenticated, user } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
   useEffect(() => {
     if (isAuthenticated && user?.role === "partner") {
@@ -27,7 +32,7 @@ export default function Login() {
     }
   }, [isAuthenticated, user, navigate]);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSubmitting) {
       return;
@@ -52,7 +57,7 @@ export default function Login() {
         }
         navigate("/dashboard", { replace: true });
       })
-      .catch((err) => {
+      .catch((err: Error) => {
         setError(err.message || "Invalid credentials");
       })
       .finally(() => {
@@ -60,7 +65,7 @@ export default function Login() {
       });
   };
 
-  const demoAccount = useMemo(() => {
+  const demoAccount = useMemo<DemoAccount | null>(() => {
     try {
       return import.meta.env.VITE_DEMO_ACCOUNT
         ? JSON.parse(import.meta.env.VITE_DEMO_ACCOUNT)
@@ -94,7 +99,7 @@ export default function Login() {
                 placeholder="partner@example.com"
                 autoComplete="email"
                 value={email}
-                onChange={(event) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setEmail(event.target.value);
                   if (error) {
                     setError("");
@@ -113,7 +118,7 @@ export default function Login() {
                 placeholder="••••••••"
                 autoComplete="current-password"
                 value={password}
-                onChange={(event) => {
+                onChange={(event: ChangeEvent<HTMLInputElement>) => {
                   setPassword(event.target.value);
                   if (error) {
                     setError("");

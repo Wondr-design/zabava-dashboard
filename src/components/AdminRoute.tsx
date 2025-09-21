@@ -1,8 +1,12 @@
-import React from "react";
+import type { ReactElement } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
-export default function AdminRoute({ children }) {
+interface AdminRouteProps {
+  children: ReactElement;
+}
+
+export default function AdminRoute({ children }: AdminRouteProps): ReactElement {
   const { loading, isAuthenticated, user } = useAuth();
 
   if (loading) {
