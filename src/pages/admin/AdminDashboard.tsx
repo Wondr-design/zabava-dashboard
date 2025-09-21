@@ -631,24 +631,34 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100">
-      <header className="border-b border-white/10 bg-white/5 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-6">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-semibold text-white">Admin console</h1>
-            <p className="text-sm text-slate-300">
-              Manage partners, monitor submissions, and export data across the program.
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 relative overflow-hidden">
+        {/* Subtle background effects */}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5"></div>
+        <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/3 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
+        <div className="relative z-10">
+      <header className="border-b border-white/20 bg-white/10 backdrop-blur-md">
+        <div className="mx-auto flex w-full max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-8">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <span className="text-white font-bold text-lg">Z</span>
+              </div>
+              <h1 className="text-3xl font-bold text-white tracking-tight">Admin Console</h1>
+            </div>
+            <p className="text-base text-slate-300 max-w-lg">
+              Comprehensive dashboard for managing partners, monitoring submissions, and analyzing performance data.
             </p>
           </div>
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-left">
-              <p className="font-medium text-slate-100">{user?.email}</p>
-              <p className="text-[11px] uppercase tracking-wide">Administrator</p>
+          <div className="flex items-center gap-3 text-xs text-slate-400">
+            <div className="rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-left shadow-lg backdrop-blur-sm">
+              <p className="font-semibold text-white text-sm">{user?.email}</p>
+              <p className="text-xs uppercase tracking-wide text-slate-400 font-medium">Administrator</p>
             </div>
             <Button
               variant="outline"
               onClick={() => navigate("/admin/invites")}
-              className={cn(primaryButtonClass)}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-700 hover:to-purple-700 shadow-lg font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
             >
               Partner invites
             </Button>
@@ -656,14 +666,14 @@ export default function AdminDashboard() {
               variant="outline"
               onClick={refreshOverview}
               disabled={loadingOverview}
-              className={cn(secondaryButtonClass)}
+              className="bg-white/10 text-white border border-white/30 hover:bg-white/20 hover:border-white/50 shadow-md font-medium px-4 py-2.5 rounded-lg transition-all duration-200 disabled:opacity-50"
             >
-              {loadingOverview ? "Refreshing" : "Refresh"}
+              {loadingOverview ? "Refreshing..." : "Refresh"}
             </Button>
             <Button
               variant="outline"
               onClick={handleLogout}
-              className={cn(secondaryButtonClass)}
+              className="bg-white/10 text-white border border-white/30 hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-100 shadow-md font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
             >
               Logout
             </Button>
@@ -683,27 +693,30 @@ export default function AdminDashboard() {
           ))}
         </section>
 
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {quickActionItems.map((action) => (
             <Card
               key={action.id}
-              className="border-white/10 bg-white/[0.07] backdrop-blur"
+              className="group border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/30 overflow-hidden relative"
             >
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-white">
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <CardHeader className="pb-3 relative z-10">
+                <CardTitle className="text-base font-semibold text-white group-hover:text-blue-100 transition-colors">
                   {action.label}
                 </CardTitle>
-                <CardDescription>{action.description}</CardDescription>
+                <CardDescription className="text-slate-400 group-hover:text-slate-300 transition-colors">
+                  {action.description}
+                </CardDescription>
               </CardHeader>
-              <CardContent className="pt-0">
+              <CardContent className="pt-0 relative z-10">
                 <Button
                   variant="outline"
                   size="sm"
-                  className={cn(primaryButtonClass)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white border-0 hover:from-blue-700 hover:to-purple-700 shadow-md font-medium px-4 py-2 rounded-lg transition-all duration-200"
                   onClick={action.action}
                   disabled={loadingOverviewStats}
                 >
-                  Go
+                  {loadingOverviewStats ? "Loading..." : "Go"}
                 </Button>
               </CardContent>
             </Card>
@@ -920,13 +933,13 @@ export default function AdminDashboard() {
           </select>
         </section>
 
-        <section className="grid gap-6 xl:grid-cols-3">
-          <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl xl:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-base text-white">
+        <section className="grid gap-6 xl:grid-cols-5">
+          <Card className="border-white/10 bg-white/[0.08] backdrop-blur-xl xl:col-span-2 shadow-xl">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-white">
                 Global revenue trend
               </CardTitle>
-              <CardDescription>Aggregated submissions by day</CardDescription>
+              <CardDescription className="text-slate-400">Aggregated submissions by day</CardDescription>
             </CardHeader>
             <CardContent className="h-[320px] px-0 pb-0">
               {loadingOverview && !overview ? (
@@ -982,105 +995,180 @@ export default function AdminDashboard() {
             </CardContent>
           </Card>
 
-          <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl">
-            <CardHeader>
-              <CardTitle className="text-base text-white">Partner summary</CardTitle>
-              <CardDescription>Snapshot of partner performance</CardDescription>
+          {/* Modern Partner Summary with fixed height and scroll */}
+          <Card className="border-white/10 bg-white/[0.08] backdrop-blur-xl xl:col-span-3 shadow-xl">
+            <CardHeader className="pb-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg font-semibold text-white">Partner summary</CardTitle>
+                  <CardDescription className="text-slate-400">Snapshot of partner performance</CardDescription>
+                </div>
+                {partnerSummary.length > 0 && (
+                  <div className="flex items-center gap-2">
+                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
+                    <span className="text-sm font-medium text-slate-300">
+                      {partnerSummary.length} partner{partnerSummary.length !== 1 ? 's' : ''}
+                    </span>
+                  </div>
+                )}
+              </div>
             </CardHeader>
-            <CardContent className="grid gap-3">
+            <CardContent className="px-0 pb-0">
               {partnerSummary.length === 0 ? (
-                <p className="text-sm text-slate-400">No partners available.</p>
+                <div className="px-6 pb-6">
+                  <p className="text-sm text-slate-400">No partners available.</p>
+                </div>
               ) : (
-                partnerSummary.slice(0, 10).map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-slate-200"
-                  >
-                    <div>
-                      <p className="font-semibold text-white">{item.id}</p>
-                      <p className="text-xs text-slate-400">
-                        {numberFormatter.format(item.metrics.count)} submissions · {numberFormatter.format(item.metrics.used)} used
-                      </p>
-                    </div>
-                    <div className="text-right text-xs text-slate-400">
-                      <p>{currencyFormatter.format(item.metrics.revenue)}</p>
-                      <p>{formatDate(item.lastSubmissionAt)}</p>
+                <div className="relative">
+                  {/* Scroll container with fixed height */}
+                  <div className="max-h-80 overflow-y-auto px-6 pb-6 partner-summary-scroll">
+                    <div className="space-y-2">
+                      {partnerSummary.map((item) => {
+                        const hasRevenue = item.metrics.revenue > 0;
+                        const conversionRate = item.metrics.count > 0 
+                          ? Math.round((item.metrics.used / item.metrics.count) * 100) 
+                          : 0;
+                        
+                        return (
+                          <div
+                            key={item.id}
+                            className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 sm:px-4 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06]"
+                          >
+                            <div className="flex items-center space-x-2 sm:space-x-3">
+                              {/* Partner Avatar/Initial */}
+                              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-xs sm:text-sm font-semibold text-white">
+                                {item.id.substring(0, 2).toUpperCase()}
+                              </div>
+                              
+                              {/* Partner Info */}
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-center space-x-2">
+                                  <p className="font-semibold text-white text-xs sm:text-sm">
+                                    {item.id.toUpperCase()}
+                                  </p>
+                                  {conversionRate > 0 && (
+                                    <span className="inline-flex items-center rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-xs font-medium text-emerald-200">
+                                      {conversionRate}%
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center space-x-3 text-xs text-slate-400">
+                                  <span>{numberFormatter.format(item.metrics.count)} submissions</span>
+                                  <span>•</span>
+                                  <span>
+                                    {numberFormatter.format(item.metrics.used)} used
+                                    {item.metrics.unused > 0 && (
+                                      <span className="text-amber-300"> ({item.metrics.unused} pending)</span>
+                                    )}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Revenue and Date */}
+                            <div className="text-right">
+                              <p className={`text-xs sm:text-sm font-medium ${
+                                hasRevenue ? 'text-emerald-300' : 'text-slate-400'
+                              }`}>
+                                {currencyFormatter.format(item.metrics.revenue)}
+                              </p>
+                              <p className="text-xs text-slate-500">
+                                {item.lastSubmissionAt 
+                                  ? formatDate(item.lastSubmissionAt).split(',')[0] // Show only date, not time
+                                  : '—'
+                                }
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
-                ))
+                  
+                  {/* Scroll indicator gradients */}
+                  {partnerSummary.length > 6 && (
+                    <>
+                      <div className="pointer-events-none absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-slate-950/20 to-transparent" />
+                      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-950/20 to-transparent" />
+                    </>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
         </section>
 
-        <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl">
-          <CardHeader>
-            <CardTitle className="text-base text-white">Latest submissions</CardTitle>
-            <CardDescription>Most recent activity across partners</CardDescription>
+        <Card className="border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg font-semibold text-white">Latest submissions</CardTitle>
+            <CardDescription className="text-slate-400">Most recent activity across partners</CardDescription>
           </CardHeader>
           <CardContent className="overflow-x-auto px-0">
-            <table className="min-w-full divide-y divide-white/10">
-              <thead className="bg-white/[0.04]">
+            <table className="min-w-full divide-y divide-white/20">
+              <thead className="bg-white/[0.08]">
                 <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
                     Partner
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
                     Email
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
                     Ticket
                   </th>
-                  <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-200">
                     Total
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
                     QR Status
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
                     Visit
                   </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
                     Created
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/10 bg-white/[0.02]">
+              <tbody className="divide-y divide-white/10 bg-white/[0.04]">
                 {latest.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="px-3 py-4 text-center text-sm text-slate-400">
+                    <td colSpan={7} className="px-4 py-6 text-center text-sm text-slate-400">
                       No submissions yet.
                     </td>
                   </tr>
                 ) : (
                   latest.slice(0, 12).map((item, index) => (
-                      <tr key={`${item.partnerId}-${item.email}-${index}`}>
-                        <td className="px-3 py-2 text-sm text-slate-200">{item.partnerId}</td>
-                        <td className="px-3 py-2 text-sm text-slate-300">{item.email}</td>
-                        <td className="px-3 py-2 text-sm text-slate-300">{item.ticket || "N/A"}</td>
-                        <td className="px-3 py-2 text-right text-sm text-slate-300">
+                      <tr key={`${item.partnerId}-${item.email}-${index}`} className="hover:bg-white/[0.06] transition-colors duration-150">
+                        <td className="px-4 py-3 text-sm font-medium text-slate-100">{item.partnerId}</td>
+                        <td className="px-4 py-3 text-sm text-slate-200">{item.email}</td>
+                        <td className="px-4 py-3 text-sm text-slate-300">{item.ticket || "N/A"}</td>
+                        <td className="px-4 py-3 text-right text-sm font-medium text-slate-200">
                           {currencyFormatter.format(item.totalPrice || 0)}
                         </td>
-                        <td className="px-3 py-2 text-sm text-slate-300">{item.used ? "Used" : "Pending"}</td>
-                        <td className="px-3 py-2 text-sm text-slate-300">
+                        <td className="px-4 py-3 text-sm text-slate-300">{item.used ? "Used" : "Pending"}</td>
+                        <td className="px-4 py-3 text-sm text-slate-300">
                           <div className="flex flex-col gap-1">
                             <span
-                              className={`inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                              className={`inline-flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm ${
                                 item.visited
-                                  ? "bg-emerald-500/15 text-emerald-200"
-                                  : "bg-amber-400/15 text-amber-200"
+                                  ? "bg-emerald-500/20 text-emerald-100 border border-emerald-500/30"
+                                  : "bg-amber-400/20 text-amber-100 border border-amber-400/30"
                               }`}
                             >
+                              <div className={`h-1.5 w-1.5 rounded-full ${
+                                item.visited ? "bg-emerald-400" : "bg-amber-400"
+                              }`}></div>
                               {item.visited ? "Visited" : "Unconfirmed"}
                             </span>
                             {item.visitedAt ? (
-                              <span className="text-xs text-slate-400">
+                              <span className="text-xs text-slate-400 font-medium">
                                 {formatDate(item.visitedAt)}
                               </span>
                             ) : null}
                           </div>
                         </td>
-                        <td className="px-3 py-2 text-sm text-slate-400">{formatDate(item.createdAt)}</td>
+                        <td className="px-4 py-3 text-sm text-slate-400 font-medium">{formatDate(item.createdAt)}</td>
                       </tr>
                     ))
                 )}
@@ -1089,11 +1177,11 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="border-white/10 bg-white/[0.06] backdrop-blur-xl">
-          <CardHeader className="flex flex-wrap items-center justify-between gap-3">
+        <Card className="border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl">
+          <CardHeader className="flex flex-wrap items-center justify-between gap-4 pb-4">
             <div>
-              <CardTitle className="text-base text-white">Search submissions</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-lg font-semibold text-white">Search submissions</CardTitle>
+              <CardDescription className="text-slate-400">
                 Filter by partner or email keyword and export results.
               </CardDescription>
             </div>
@@ -1101,7 +1189,7 @@ export default function AdminDashboard() {
               variant="outline"
               size="sm"
               onClick={handleExport}
-              className={cn(primaryButtonClass)}
+              className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0 hover:from-emerald-700 hover:to-teal-700 shadow-lg font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
             >
               Download CSV
             </Button>
@@ -1112,10 +1200,10 @@ export default function AdminDashboard() {
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
                 placeholder="Search by email, ticket, partner..."
-                className="w-full max-w-sm bg-white/[0.08] text-white"
+                className="w-full max-w-sm bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg shadow-sm"
               />
               <select
-                className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
+                className="rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
                 value={searchPartner}
                 onChange={(event) => setSearchPartner(event.target.value)}
               >
@@ -1278,7 +1366,8 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
       </main>
-    </div>
+        </div>
+      </div>
 
     <Dialog open={Boolean(editingPartnerId)} onOpenChange={(open) => (open ? null : closePartnerEditor())}>
       {partnerForm ? (
@@ -1474,16 +1563,23 @@ export default function AdminDashboard() {
 
 function MetricCard({ title, value, subtitle }) {
   return (
-    <Card className="border-white/10 bg-white/[0.06] backdrop-blur transition hover:border-white/20 hover:bg-white/[0.09]">
-      <CardContent className="p-6">
-        <div className="flex flex-col gap-3">
-          <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+    <Card className="group border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:border-white/30 hover:from-white/[0.12] hover:to-white/[0.16] overflow-hidden relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+      <CardContent className="p-6 relative z-10">
+        <div className="flex flex-col gap-4">
+          <p className="text-xs font-semibold uppercase tracking-widest text-slate-300 group-hover:text-slate-200 transition-colors">
             {title}
           </p>
-          <p className="text-3xl font-semibold text-white">{value}</p>
-          {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+          <p className="text-3xl font-bold text-white group-hover:text-blue-100 transition-colors duration-300">{value}</p>
+          {subtitle && (
+            <p className="text-xs text-slate-400 group-hover:text-slate-300 leading-relaxed transition-colors">
+              {subtitle}
+            </p>
+          )}
         </div>
       </CardContent>
+      {/* Subtle border glow effect */}
+      <div className="absolute inset-0 rounded-lg ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-300"></div>
     </Card>
   );
 }
