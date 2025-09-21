@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import PrivateRoute from "./components/PrivateRoute";
 import Login from "./pages/Login";
@@ -9,7 +8,7 @@ import InviteManager from "./pages/admin/InviteManager";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 
-function App() {
+function App(): JSX.Element {
   return (
     <BrowserRouter>
       <Routes>

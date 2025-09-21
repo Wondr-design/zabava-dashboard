@@ -1,5 +1,12 @@
-// src/pages/PartnerDashboard.jsx
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ChangeEvent,
+  type CSSProperties,
+  type RefObject,
+} from "react";
 import { useNavigate } from "react-router-dom";
 import { SubmissionsTable } from "../components/SubmissionsTable";
 import { usePartnerData } from "../hooks/usePartnerData";
@@ -40,8 +47,47 @@ import { cn } from "@/lib/utils";
 import { API_BASE_URL } from "@/lib/config";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { SubmissionRecord } from "@/types/dashboard";
 
 const COLORS = ["#22d3ee", "#a855f7", "#f97316", "#4ade80", "#facc15"];
+
+type VisitFilter = "all" | "visited" | "unvisited";
+
+interface FiltersState {
+  ticket: string;
+  visited: VisitFilter;
+  startDate: string;
+  endDate: string;
+  search: string;
+}
+
+interface NavigationItem {
+  id: "overview" | "submissions";
+  label: string;
+  active: boolean;
+}
+
+interface ChartPoint {
+  date: string;
+  revenue: number;
+}
+
+interface PieSlice {
+  name: string;
+  value: number;
+}
+
+interface MetricsSummary {
+  count: number;
+  used: number;
+  unused: number;
+  visited: number;
+  notVisited: number;
+  revenue: number;
+  points: number;
+  averageRevenue: number;
+  averagePoints: number;
+}
 
 export default function PartnerDashboard() {
   const navigate = useNavigate();
@@ -56,17 +102,26 @@ export default function PartnerDashboard() {
     token,
     onUnauthorized: logout,
   });
-  const [refreshing, setRefreshing] = useState(false);
-  const [activeSection, setActiveSection] = useState("overview");
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const [activeSection, setActiveSection] = useState<"overview" | "submissions">(
+    "overview"
+  );
 
-  const overviewRef = useRef(null);
-  const submissionsRef = useRef(null);
+  const overviewRef = useRef<HTMLDivElement | null>(null);
+  const submissionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!partnerId) {
       navigate("/login", { replace: true });
     }
   }, [partnerId, navigate]);
+
+  const submissions = useMemo<SubmissionRecord[]>(() => {
+    if (Array.isArray(data?.submissions)) {
+      return data.submissions as SubmissionRecord[];
+    }
+    return [];
+  }, [data?.submissions]);
 
   const partnerLabel = useMemo(() => {
     const submissionWithAttraction = submissions.find((entry) => {
@@ -110,23 +165,16 @@ export default function PartnerDashboard() {
     };
   }, [partnerLabel]);
 
-  const submissions = useMemo(() => {
-    if (Array.isArray(data?.submissions)) {
-      return data.submissions;
-    }
-    return [];
-  }, [data?.submissions]);
-
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<FiltersState>({
     ticket: "all",
     visited: "all",
     startDate: "",
     endDate: "",
     search: "",
   });
-  const [visitUpdating, setVisitUpdating] = useState({});
+  const [visitUpdating, setVisitUpdating] = useState<Record<string, boolean>>({});
 
-  const metrics = useMemo(() => {
+  const metrics = useMemo<MetricsSummary>(() => {
     const count = submissions.length;
     let used = 0;
     let visited = 0;
@@ -167,8 +215,8 @@ export default function PartnerDashboard() {
     return (metrics.visited / metrics.count) * 100;
   }, [metrics.count, metrics.visited]);
 
-  const availableTickets = useMemo(() => {
-    const set = new Set();
+  const availableTickets = useMemo<string[]>(() => {
+    const set = new Set<string>();
     submissions.forEach((submission) => {
       if (submission.ticket) {
         set.add(submission.ticket);
@@ -177,7 +225,7 @@ export default function PartnerDashboard() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [submissions]);
 
-  const filteredSubmissions = useMemo(() => {
+  const filteredSubmissions = useMemo<SubmissionRecord[]>(() => {
     return submissions.filter((submission) => {
       const createdAtTime = submission.createdAt
         ? new Date(submission.createdAt).getTime()
@@ -234,7 +282,10 @@ export default function PartnerDashboard() {
 
   const filteredCount = filteredSubmissions.length;
 
-  const handleFilterChange = (name, value) => {
+  const handleFilterChange = <K extends keyof FiltersState>(
+    name: K,
+    value: FiltersState[K]
+  ) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -249,7 +300,7 @@ export default function PartnerDashboard() {
   };
 
   const handleExport = () => {
-    const rows = (filteredSubmissions.length ? filteredSubmissions : submissions) || [];
+    const rows = filteredSubmissions.length ? filteredSubmissions : submissions;
     if (!rows.length) {
       return;
     }
@@ -268,7 +319,7 @@ export default function PartnerDashboard() {
       "City Code",
     ];
 
-    const escapeForCsv = (value) => {
+    const escapeForCsv = (value: unknown) => {
       return `"${String(value ?? "").replace(/"/g, '""')}"`;
     };
 
@@ -301,22 +352,22 @@ export default function PartnerDashboard() {
     window.URL.revokeObjectURL(url);
   };
 
-  const handleToggleVisited = async (submission) => {
+  const handleToggleVisited = async (submission: SubmissionRecord) => {
     if (!token || !submission?.email) return;
     const email = submission.email;
     setVisitUpdating((prev) => ({ ...prev, [email]: true }));
     try {
-    const response = await fetch(`${API_BASE_URL}/api/partner/visit`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        email,
-        partnerId,
-      }),
-    });
+      const response = await fetch(`${API_BASE_URL}/api/partner/visit`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          email,
+          partnerId,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`Visit update failed: ${response.status}`);
@@ -356,7 +407,7 @@ export default function PartnerDashboard() {
 
   const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
-  const revenueTrend = useMemo(() => {
+  const revenueTrend = useMemo<ChartPoint[]>(() => {
     if (!submissions.length) {
       return [];
     }
@@ -365,27 +416,33 @@ export default function PartnerDashboard() {
       .filter((entry) => entry.createdAt)
       .sort(
         (a, b) =>
-          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          new Date(a.createdAt!).getTime() - new Date(b.createdAt!).getTime()
       )
       .map((submission) => ({
-        date: new Date(submission.createdAt).toLocaleDateString(undefined, {
-          month: "short",
-          day: "numeric",
-        }),
-        revenue: submission.totalPrice || 0,
+        date: new Date(submission.createdAt as string).toLocaleDateString(
+          undefined,
+          {
+            month: "short",
+            day: "numeric",
+          }
+        ),
+        revenue: Number(submission.totalPrice || 0),
       }));
   }, [submissions]);
 
-  const pieData = useMemo(() => {
+  const pieData = useMemo<PieSlice[]>(() => {
     if (!submissions.length) {
       return [];
     }
 
-    const distribution = submissions.reduce((acc, submission) => {
-      const key = submission.ticket || "N/A";
-      acc[key] = (acc[key] || 0) + 1;
-      return acc;
-    }, {});
+    const distribution = submissions.reduce<Record<string, number>>(
+      (acc, submission) => {
+        const key = submission.ticket || "N/A";
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
 
     return Object.entries(distribution).map(([name, value]) => ({
       name,
@@ -393,7 +450,7 @@ export default function PartnerDashboard() {
     }));
   }, [submissions]);
 
-  const topTicketTypes = useMemo(() => {
+  const topTicketTypes = useMemo<PieSlice[]>(() => {
     if (!pieData.length) {
       return [];
     }
@@ -402,23 +459,23 @@ export default function PartnerDashboard() {
       .slice(0, 3);
   }, [pieData]);
 
-  const bestSubmission = useMemo(() => {
+  const bestSubmission = useMemo<SubmissionRecord | null>(() => {
     if (!submissions.length) {
       return null;
     }
 
-    return submissions.reduce((top, submission) => {
-      const current = submission.totalPrice || 0;
-      const topValue = top?.totalPrice || 0;
+    return submissions.reduce<SubmissionRecord | null>((top, submission) => {
+      const current = Number(submission.totalPrice || 0);
+      const topValue = Number(top?.totalPrice || 0);
       return current > topValue ? submission : top;
-    }, submissions[0]);
+    }, submissions[0] ?? null);
   }, [submissions]);
 
   const lastUpdatedLabel = useMemo(() => {
     if (!data?.lastUpdated) {
       return null;
     }
-    const date = new Date(data.lastUpdated);
+    const date = new Date(data.lastUpdated as string);
     if (Number.isNaN(date.getTime())) {
       return null;
     }
@@ -435,7 +492,7 @@ export default function PartnerDashboard() {
   const averageRevenue = metrics.averageRevenue || 0;
   const points = metrics.points || 0;
 
-  const navigationItems = useMemo(
+  const navigationItems = useMemo<NavigationItem[]>(
     () => [
       {
         id: "overview",
@@ -465,7 +522,10 @@ export default function PartnerDashboard() {
       return undefined;
     }
 
-    const sections = [
+    const sections: Array<{
+      id: "overview" | "submissions";
+      ref: RefObject<HTMLDivElement>;
+    }> = [
       { id: "overview", ref: overviewRef },
       { id: "submissions", ref: submissionsRef },
     ];
@@ -508,7 +568,7 @@ export default function PartnerDashboard() {
     };
   }, []);
 
-  const tooltipStyles = useMemo(
+  const tooltipStyles = useMemo<CSSProperties>(
     () => ({
       background: "rgba(15, 23, 42, 0.92)",
       borderRadius: 12,
@@ -518,11 +578,11 @@ export default function PartnerDashboard() {
     }),
     []
   );
-  const tooltipLabelStyle = useMemo(
+  const tooltipLabelStyle = useMemo<CSSProperties>(
     () => ({ color: "#e2e8f0", fontWeight: 600 }),
     []
   );
-  const tooltipItemStyle = useMemo(
+  const tooltipItemStyle = useMemo<CSSProperties>(
     () => ({ color: "#38bdf8", fontWeight: 500 }),
     []
   );
@@ -861,7 +921,9 @@ export default function PartnerDashboard() {
                         </label>
                         <Input
                           value={filters.search}
-                          onChange={(event) => handleFilterChange("search", event.target.value)}
+                onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                  handleFilterChange("search", event.target.value)
+                }
                           placeholder="Search email, category, ticket"
                           className="bg-slate-950/50 text-white"
                         />
@@ -872,7 +934,9 @@ export default function PartnerDashboard() {
                         </label>
                         <select
                           value={filters.ticket}
-                          onChange={(event) => handleFilterChange("ticket", event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                    handleFilterChange("ticket", event.target.value)
+                  }
                           className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white"
                         >
                           <option value="all">All tickets</option>
@@ -889,7 +953,9 @@ export default function PartnerDashboard() {
                         </label>
                         <select
                           value={filters.visited}
-                          onChange={(event) => handleFilterChange("visited", event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLSelectElement>) =>
+                    handleFilterChange("visited", event.target.value as VisitFilter)
+                  }
                           className="rounded-md border border-white/10 bg-slate-950/60 px-3 py-2 text-sm text-white"
                         >
                           <option value="all">All</option>
@@ -905,7 +971,9 @@ export default function PartnerDashboard() {
                           <Input
                             type="date"
                             value={filters.startDate}
-                            onChange={(event) => handleFilterChange("startDate", event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    handleFilterChange("startDate", event.target.value)
+                  }
                             className="bg-slate-950/60 text-white"
                           />
                         </div>
@@ -916,7 +984,9 @@ export default function PartnerDashboard() {
                           <Input
                             type="date"
                             value={filters.endDate}
-                            onChange={(event) => handleFilterChange("endDate", event.target.value)}
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    handleFilterChange("endDate", event.target.value)
+                  }
                             className="bg-slate-950/60 text-white"
                           />
                         </div>

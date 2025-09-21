@@ -1,7 +1,8 @@
-import React from "react";
+import type { ReactNode } from "react";
 import { Button } from "@/components/ui/button";
+import type { SubmissionRecord } from "@/types/dashboard";
 
-function formatDate(value) {
+function formatDate(value?: string | null): string {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
@@ -10,12 +11,21 @@ function formatDate(value) {
   return date.toLocaleString();
 }
 
+export interface SubmissionsTableProps {
+  submissions: SubmissionRecord[];
+  isLoading?: boolean;
+  onToggleVisited?: (submission: SubmissionRecord) => void;
+  visitUpdating?: Record<string, boolean>;
+  emptyState?: ReactNode;
+}
+
 export function SubmissionsTable({
   submissions,
   isLoading = false,
   onToggleVisited,
   visitUpdating = {},
-}) {
+  emptyState,
+}: SubmissionsTableProps) {
   if (isLoading) {
     return (
       <div className="flex h-32 items-center justify-center">
@@ -26,7 +36,9 @@ export function SubmissionsTable({
 
   if (!submissions || submissions.length === 0) {
     return (
-      <div className="py-8 text-center text-slate-500">No submissions found</div>
+      <div className="py-8 text-center text-slate-500">
+        {emptyState ?? "No submissions found"}
+      </div>
     );
   }
 
@@ -65,9 +77,12 @@ export function SubmissionsTable({
           </tr>
         </thead>
         <tbody className="divide-y divide-white/5 bg-white/[0.02]">
-          {submissions.map((sub, idx) => (
-            <tr
-              key={sub.email || idx}
+          {submissions.map((sub, idx) => {
+            const key = sub.email ?? String(idx);
+            const isUpdating = Boolean(visitUpdating[key]);
+            return (
+              <tr
+              key={key}
               className="transition hover:bg-white/[0.05]"
             >
               <td className="px-3 py-3 text-sm text-slate-100">{sub.email}</td>
@@ -119,9 +134,9 @@ export function SubmissionsTable({
                       variant="outline"
                       className="h-7 w-fit border-white/30 bg-white/80 text-slate-900 hover:bg-white"
                       onClick={() => onToggleVisited(sub)}
-                      disabled={Boolean(visitUpdating[sub.email])}
+                      disabled={isUpdating}
                     >
-                      {visitUpdating[sub.email] ? "Saving..." : "Mark visited"}
+                      {isUpdating ? "Saving..." : "Mark visited"}
                     </Button>
                   ) : null}
                 </div>
@@ -130,7 +145,8 @@ export function SubmissionsTable({
                 {formatDate(sub.createdAt)}
               </td>
             </tr>
-          ))}
+          );
+          })}
         </tbody>
       </table>
     </div>
