@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { useCallback, useEffect, useMemo, useState } from "react";
+import type { CSSProperties } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Card,
@@ -26,6 +26,14 @@ import { useAuth } from "@/context/AuthContext";
 import { API_BASE_URL, buildApiUrl } from "@/lib/config";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import type {
+  AdminAnalyticsOverview,
+  AdminOverviewResponse,
+  AdminPartnerDirectoryItem,
+  AdminPartnerSummary,
+  PartnerFormState,
+  SubmissionRecord,
+} from "@/types/dashboard";
 import {
   LineChart,
   Line,
@@ -36,7 +44,7 @@ import {
   Legend,
 } from "recharts";
 
-function formatDate(iso) {
+function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "—";
@@ -44,6 +52,50 @@ function formatDate(iso) {
     dateStyle: "medium",
     timeStyle: "short",
   });
+}
+
+type SearchVisitedFilter = "all" | "visited" | "unvisited";
+
+interface PartnerDirectoryResponse {
+  items?: AdminPartnerDirectoryItem[];
+}
+
+interface SubmissionSearchResponse {
+  items?: SubmissionRecord[];
+}
+
+interface AnalyticsTotals {
+  count: number;
+  used: number;
+  unused: number;
+  visited: number;
+  notVisited: number;
+  revenue: number;
+  points: number;
+  bonusRedemptions: number;
+  averageRevenue: number;
+  averagePoints: number;
+}
+
+interface OverviewTotalsShape {
+  activePartners?: number;
+  qrsGeneratedToday?: number;
+  qrsScannedToday?: number;
+  monthlyVisitors?: number;
+  totalRevenue?: number;
+  unvisitedQRCodes?: number;
+}
+
+interface QuickActionsShape {
+  pendingPartnerApprovals?: number;
+}
+
+interface MetricCardProps {
+  title: string;
+  value: string;
+  subtitle?: string;
+  className?: string;
+  style?: CSSProperties;
 }
 
 export default function AdminDashboard() {
@@ -54,28 +106,28 @@ export default function AdminDashboard() {
   const primaryButtonClass = "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
   const secondaryButtonClass = "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
 
-  const [partners, setPartners] = useState([]);
-  const [overviewPartner, setOverviewPartner] = useState("");
-  const [overviewRefreshIndex, setOverviewRefreshIndex] = useState(0);
-  const [overview, setOverview] = useState(null);
-  const [loadingOverview, setLoadingOverview] = useState(false);
-  const [overviewStats, setOverviewStats] = useState(null);
-  const [loadingOverviewStats, setLoadingOverviewStats] = useState(false);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [searchPartner, setSearchPartner] = useState("");
-  const [searchResults, setSearchResults] = useState([]);
-  const [loadingSearch, setLoadingSearch] = useState(false);
-  const [searchTicket, setSearchTicket] = useState("all");
-  const [searchVisited, setSearchVisited] = useState("all");
-  const [searchStartDate, setSearchStartDate] = useState("");
-  const [searchEndDate, setSearchEndDate] = useState("");
-  const [partnerDirectory, setPartnerDirectory] = useState([]);
-  const [loadingPartnerDirectory, setLoadingPartnerDirectory] = useState(false);
-  const [partnerSearchTerm, setPartnerSearchTerm] = useState("");
-  const [partnerStatusFilter, setPartnerStatusFilter] = useState("all");
-  const [editingPartnerId, setEditingPartnerId] = useState(null);
-  const [partnerForm, setPartnerForm] = useState(null);
-  const [savingPartner, setSavingPartner] = useState(false);
+  const [partners, setPartners] = useState<AdminPartnerSummary[]>([]);
+  const [overviewPartner, setOverviewPartner] = useState<string>("all");
+  const [overviewRefreshIndex, setOverviewRefreshIndex] = useState<number>(0);
+  const [overview, setOverview] = useState<AdminAnalyticsOverview | null>(null);
+  const [loadingOverview, setLoadingOverview] = useState<boolean>(false);
+  const [overviewStats, setOverviewStats] = useState<AdminOverviewResponse | null>(null);
+  const [loadingOverviewStats, setLoadingOverviewStats] = useState<boolean>(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [searchPartner, setSearchPartner] = useState<string>("");
+  const [searchResults, setSearchResults] = useState<SubmissionRecord[]>([]);
+  const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
+  const [searchTicket, setSearchTicket] = useState<string>("all");
+  const [searchVisited, setSearchVisited] = useState<SearchVisitedFilter>("all");
+  const [searchStartDate, setSearchStartDate] = useState<string>("");
+  const [searchEndDate, setSearchEndDate] = useState<string>("");
+  const [partnerDirectory, setPartnerDirectory] = useState<AdminPartnerDirectoryItem[]>([]);
+  const [loadingPartnerDirectory, setLoadingPartnerDirectory] = useState<boolean>(false);
+  const [partnerSearchTerm, setPartnerSearchTerm] = useState<string>("");
+  const [partnerStatusFilter, setPartnerStatusFilter] = useState<string>("all");
+  const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
+  const [partnerForm, setPartnerForm] = useState<PartnerFormState | null>(null);
+  const [savingPartner, setSavingPartner] = useState<boolean>(false);
 
   useEffect(() => {
     if (!isAdmin) {
@@ -93,73 +145,89 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!isAdmin || !token) return;
 
-    let abort = false;
-    async function fetchPartners() {
+    let isActive = true;
+
+    const fetchPartners = async () => {
       try {
-        const response = await fetch(buildApiUrl("/api/admin/analytics", { mode: "metrics" }), {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const response = await fetch(
+          buildApiUrl("/api/admin/analytics", { mode: "metrics" }),
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error(`Partners fetch failed: ${response.status}`);
         }
-        const payload = await response.json();
-        if (abort) return;
-        const items = payload.partners || [];
+        const payload: AdminAnalyticsOverview = await response.json();
+        if (!isActive) {
+          return;
+        }
+        const items = [...(payload.partners ?? [])];
         items.sort((a, b) => a.id.localeCompare(b.id));
         setPartners(items);
-        if (!overviewPartner && items.length) {
-          setOverviewPartner("all");
-        }
       } catch (err) {
-        console.error("Failed to load partners", err);
+        if (isActive) {
+          console.error("Failed to load partners", err);
+        }
       }
-    }
+    };
 
     fetchPartners();
     return () => {
-      abort = true;
+      isActive = false;
     };
-  }, [isAdmin, token, overviewPartner]);
+  }, [isAdmin, token]);
 
   useEffect(() => {
     if (!isAdmin || !token) return;
 
     const controller = new AbortController();
-    setLoadingOverview(true);
+    let isActive = true;
 
-    const metricsUrl = buildApiUrl("/api/admin/analytics", {
-      mode: "metrics",
-      partnerId: overviewPartner && overviewPartner !== "all" ? overviewPartner : undefined,
-    });
+    const loadOverview = async () => {
+      setLoadingOverview(true);
+      try {
+        const metricsUrl = buildApiUrl("/api/admin/analytics", {
+          mode: "metrics",
+          partnerId: overviewPartner !== "all" ? overviewPartner : undefined,
+        });
 
-    fetch(metricsUrl, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
-      .then((response) => {
+        const response = await fetch(metricsUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
+
         if (!response.ok) {
           throw new Error(`Metrics fetch failed: ${response.status}`);
         }
-        return response.json();
-      })
-      .then((payload) => {
-        setOverview(payload);
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          console.error("Failed to load metrics", err);
-        }
-      })
-      .finally(() => {
-        setLoadingOverview(false);
-      });
 
-    return () => controller.abort();
-  }, [isAdmin, token, overviewPartner, overviewRefreshIndex]);
+        const payload: AdminAnalyticsOverview = await response.json();
+        if (isActive) {
+          setOverview(payload);
+        }
+      } catch (error) {
+        const errorInstance = error as Error;
+        if (errorInstance.name !== "AbortError") {
+          console.error("Failed to load metrics", errorInstance);
+        }
+      } finally {
+        if (isActive) {
+          setLoadingOverview(false);
+        }
+      }
+    };
+
+    loadOverview();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, [isAdmin, overviewPartner, overviewRefreshIndex, token]);
 
   const loadPartnerDirectory = useCallback(async () => {
     if (!isAdmin || !token) return;
@@ -173,8 +241,8 @@ export default function AdminDashboard() {
       if (!response.ok) {
         throw new Error(`Partner directory fetch failed: ${response.status}`);
       }
-      const payload = await response.json();
-      setPartnerDirectory(payload.items || []);
+      const payload: PartnerDirectoryResponse = await response.json();
+      setPartnerDirectory(payload.items ?? []);
     } catch (err) {
       console.error("Failed to load partner directory", err);
     } finally {
@@ -190,33 +258,42 @@ export default function AdminDashboard() {
     if (!isAdmin || !token) return;
 
     const controller = new AbortController();
-    setLoadingOverviewStats(true);
+    let isActive = true;
 
-    fetch(`${API_BASE_URL}/api/admin/overview`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      signal: controller.signal,
-    })
-      .then((response) => {
+    const loadOverviewStats = async () => {
+      setLoadingOverviewStats(true);
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/admin/overview`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
+        });
         if (!response.ok) {
           throw new Error(`Overview fetch failed: ${response.status}`);
         }
-        return response.json();
-      })
-      .then((payload) => {
-        setOverviewStats(payload);
-      })
-      .catch((err) => {
-        if (err.name !== "AbortError") {
-          console.error("Failed to load overview counters", err);
+        const payload: AdminOverviewResponse = await response.json();
+        if (isActive) {
+          setOverviewStats(payload);
         }
-      })
-      .finally(() => {
-        setLoadingOverviewStats(false);
-      });
+      } catch (error) {
+        const errorInstance = error as Error;
+        if (errorInstance.name !== "AbortError") {
+          console.error("Failed to load overview counters", errorInstance);
+        }
+      } finally {
+        if (isActive) {
+          setLoadingOverviewStats(false);
+        }
+      }
+    };
 
-    return () => controller.abort();
+    loadOverviewStats();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
   }, [isAdmin, token, overviewRefreshIndex]);
 
   useEffect(() => {
@@ -229,6 +306,7 @@ export default function AdminDashboard() {
     }
 
     const controller = new AbortController();
+    let isActive = true;
     setLoadingSearch(true);
     const submissionsUrl = buildApiUrl("/api/admin/analytics", {
       mode: "submissions",
@@ -236,35 +314,38 @@ export default function AdminDashboard() {
       partnerId: searchPartner || undefined,
     });
 
-    const timeout = setTimeout(() => {
-      fetch(submissionsUrl, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        signal: controller.signal,
-      })
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Search failed: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((payload) => {
-          setSearchResults(payload.items || []);
-        })
-        .catch((err) => {
-          if (err.name !== "AbortError") {
-            console.error("Failed to run search", err);
-          }
-        })
-        .finally(() => {
-          setLoadingSearch(false);
+    const timeout = window.setTimeout(async () => {
+      try {
+        const response = await fetch(submissionsUrl, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          signal: controller.signal,
         });
+        if (!response.ok) {
+          throw new Error(`Search failed: ${response.status}`);
+        }
+        const payload: SubmissionSearchResponse = await response.json();
+        if (isActive) {
+          setSearchResults(payload.items ?? []);
+        }
+      } catch (error) {
+        const errorInstance = error as Error;
+        if (errorInstance.name !== "AbortError") {
+          console.error("Failed to run search", errorInstance);
+        }
+      } finally {
+        if (isActive) {
+          setLoadingSearch(false);
+        }
+      }
     }, 300);
 
     return () => {
-      clearTimeout(timeout);
+      isActive = false;
+      window.clearTimeout(timeout);
       controller.abort();
+      setLoadingSearch(false);
     };
   }, [isAdmin, token, searchTerm, searchPartner]);
 
@@ -332,18 +413,21 @@ export default function AdminDashboard() {
   );
   const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
-  const analyticsTotals = overview?.totals || {
-    count: 0,
-    used: 0,
-    unused: 0,
-    visited: 0,
-    notVisited: 0,
-    revenue: 0,
-    points: 0,
-    bonusRedemptions: 0,
-    averageRevenue: 0,
-    averagePoints: 0,
-  };
+  const analyticsTotals = useMemo<AnalyticsTotals>(() => {
+    const totals = (overview?.totals ?? {}) as Partial<AnalyticsTotals>;
+    return {
+      count: totals.count ?? 0,
+      used: totals.used ?? 0,
+      unused: totals.unused ?? 0,
+      visited: totals.visited ?? 0,
+      notVisited: totals.notVisited ?? 0,
+      revenue: totals.revenue ?? 0,
+      points: totals.points ?? 0,
+      bonusRedemptions: totals.bonusRedemptions ?? 0,
+      averageRevenue: totals.averageRevenue ?? 0,
+      averagePoints: totals.averagePoints ?? 0,
+    };
+  }, [overview]);
   const conversionRate = analyticsTotals.count
     ? Math.round((analyticsTotals.used / analyticsTotals.count) * 100)
     : 0;
@@ -351,8 +435,8 @@ export default function AdminDashboard() {
     ? Math.round((analyticsTotals.visited / analyticsTotals.count) * 100)
     : 0;
 
-  const searchTicketOptions = useMemo(() => {
-    const set = new Set();
+  const searchTicketOptions = useMemo<string[]>(() => {
+    const set = new Set<string>();
     searchResults.forEach((item) => {
       if (item.ticket) {
         set.add(item.ticket);
@@ -361,7 +445,7 @@ export default function AdminDashboard() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, [searchResults]);
 
-  const filteredSearchResults = useMemo(() => {
+  const filteredSearchResults = useMemo<SubmissionRecord[]>(() => {
     return searchResults.filter((item) => {
       const createdTime = item.createdAt ? new Date(item.createdAt).getTime() : null;
 
@@ -400,7 +484,7 @@ export default function AdminDashboard() {
 
   const filteredSearchCount = filteredSearchResults.length;
 
-  const filteredPartners = useMemo(() => {
+  const filteredPartners = useMemo<AdminPartnerDirectoryItem[]>(() => {
     const term = partnerSearchTerm.trim().toLowerCase();
     return partnerDirectory.filter((item) => {
       if (partnerStatusFilter !== "all" && item.status !== partnerStatusFilter) {
@@ -423,44 +507,62 @@ export default function AdminDashboard() {
     });
   }, [partnerDirectory, partnerSearchTerm, partnerStatusFilter]);
 
-  const revenueTrend = overview?.revenueTrend || [];
-  const latest = overview?.latestSubmissions || [];
-  const partnerSummary = overview?.partners || [];
+  const revenueTrend = useMemo(
+    () => (overview?.revenueTrend ?? []) as NonNullable<AdminAnalyticsOverview["revenueTrend"]>,
+    [overview]
+  );
+  const latest = useMemo<SubmissionRecord[]>(
+    () => overview?.latestSubmissions ?? [],
+    [overview]
+  );
+  const partnerSummary = useMemo<AdminPartnerSummary[]>(
+    () => overview?.partners ?? [],
+    [overview]
+  );
 
-  const overviewTotals = useMemo(
-    () => overviewStats?.totals || {},
-    [overviewStats]
-  );
-  const quickActions = useMemo(
-    () => overviewStats?.quickActions || {},
-    [overviewStats]
-  );
+  const overviewTotals = useMemo(() => {
+    const totals = (overviewStats?.totals ?? {}) as OverviewTotalsShape;
+    return {
+      activePartners: totals.activePartners ?? 0,
+      qrsGeneratedToday: totals.qrsGeneratedToday ?? 0,
+      qrsScannedToday: totals.qrsScannedToday ?? 0,
+      monthlyVisitors: totals.monthlyVisitors ?? 0,
+      totalRevenue: totals.totalRevenue ?? 0,
+      unvisitedQRCodes: totals.unvisitedQRCodes ?? 0,
+    };
+  }, [overviewStats]);
+  const quickActions = useMemo(() => {
+    const actions = (overviewStats?.quickActions ?? {}) as QuickActionsShape;
+    return {
+      pendingPartnerApprovals: actions.pendingPartnerApprovals ?? 0,
+    };
+  }, [overviewStats]);
 
   const heroCards = useMemo(
     () => [
       {
         title: "Active partners",
-        value: numberFormatter.format(overviewTotals.activePartners || 0),
+        value: numberFormatter.format(overviewTotals.activePartners),
         subtitle: "Currently live on Lasermax",
       },
       {
         title: "QRs generated today",
-        value: numberFormatter.format(overviewTotals.qrsGeneratedToday || 0),
+        value: numberFormatter.format(overviewTotals.qrsGeneratedToday),
         subtitle: "New registrations received today",
       },
       {
         title: "QRs scanned today",
-        value: numberFormatter.format(overviewTotals.qrsScannedToday || 0),
+        value: numberFormatter.format(overviewTotals.qrsScannedToday),
         subtitle: "Visits confirmed so far today",
       },
       {
         title: "Monthly visitors",
-        value: numberFormatter.format(overviewTotals.monthlyVisitors || 0),
+        value: numberFormatter.format(overviewTotals.monthlyVisitors),
         subtitle: "Visits confirmed this month",
       },
       {
         title: "Revenue (month)",
-        value: currencyFormatter.format(overviewTotals.totalRevenue || 0),
+        value: currencyFormatter.format(overviewTotals.totalRevenue),
         subtitle: "From confirmed visits",
       },
     ],
@@ -486,7 +588,7 @@ export default function AdminDashboard() {
       {
         id: "view-unvisited",
         label: `${numberFormatter.format(
-          overviewTotals.unvisitedQRCodes || 0
+          overviewTotals.unvisitedQRCodes
         )} unconfirmed visits`,
         description: "Follow up on partners to mark recent visitors",
         action: () => navigate("/admin/dashboard#submissions"),
@@ -494,7 +596,7 @@ export default function AdminDashboard() {
       {
         id: "pending-approvals",
         label: `${numberFormatter.format(
-          quickActions.pendingPartnerApprovals || 0
+          quickActions.pendingPartnerApprovals
         )} partner approvals`,
         description: "Review pending accounts",
         action: () => navigate("/admin/invites"),
@@ -508,37 +610,40 @@ export default function AdminDashboard() {
     ]
   );
 
-  const createPartnerFormState = useCallback((meta) => ({
-    partnerId: meta.partnerId,
-    status: meta.status || "active",
-    monthlyFee:
-      meta.contract?.monthlyFee !== undefined
-        ? String(meta.contract.monthlyFee)
-        : "",
-    discountRate:
-      meta.contract?.discountRate !== undefined
-        ? String(meta.contract.discountRate)
-        : "",
-    commissionRate:
-      meta.contract?.commissionRate !== undefined
-        ? String(meta.contract.commissionRate)
-        : "",
-    commissionBasis: meta.contract?.commissionBasis || "discounted",
-    ticketTypes: (meta.ticketing?.ticketTypes || []).join(", "),
-    familyRule: meta.ticketing?.familyRule || "",
-    contactName: meta.info?.contactName || "",
-    contactEmail: meta.info?.contactEmail || "",
-    payments: (meta.info?.payments || []).join(", "),
-    facilities: (meta.info?.facilities || []).join(", "),
-    website: meta.info?.website || "",
-    bonusProgramEnabled: Boolean(meta.bonusProgramEnabled),
-    notes: meta.notes || "",
-    updatedAt: meta.updatedAt || null,
-    createdAt: meta.createdAt || null,
-  }), []);
+  const createPartnerFormState = useCallback(
+    (meta: AdminPartnerDirectoryItem): PartnerFormState => ({
+      partnerId: meta.partnerId,
+      status: meta.status ?? "active",
+      monthlyFee:
+        meta.contract?.monthlyFee !== undefined
+          ? String(meta.contract.monthlyFee)
+          : "",
+      discountRate:
+        meta.contract?.discountRate !== undefined
+          ? String(meta.contract.discountRate)
+          : "",
+      commissionRate:
+        meta.contract?.commissionRate !== undefined
+          ? String(meta.contract.commissionRate)
+          : "",
+      commissionBasis: meta.contract?.commissionBasis ?? "discounted",
+      ticketTypes: (meta.ticketing?.ticketTypes ?? []).join(", "),
+      familyRule: meta.ticketing?.familyRule ?? "",
+      contactName: meta.info?.contactName ?? "",
+      contactEmail: meta.info?.contactEmail ?? "",
+      payments: (meta.info?.payments ?? []).join(", "),
+      facilities: (meta.info?.facilities ?? []).join(", "),
+      website: meta.info?.website ?? "",
+      bonusProgramEnabled: Boolean(meta.bonusProgramEnabled),
+      notes: meta.notes ?? "",
+      updatedAt: meta.updatedAt ?? null,
+      createdAt: meta.createdAt ?? null,
+    }),
+    []
+  );
 
   const openPartnerEditor = useCallback(
-    (meta) => {
+    (meta: AdminPartnerDirectoryItem) => {
       setEditingPartnerId(meta.partnerId);
       setPartnerForm(createPartnerFormState(meta));
     },
@@ -551,11 +656,17 @@ export default function AdminDashboard() {
     setSavingPartner(false);
   }, []);
 
-  const handlePartnerFieldChange = useCallback((field, value) => {
-    setPartnerForm((prev) => (prev ? { ...prev, [field]: value } : prev));
-  }, []);
+  const handlePartnerFieldChange = useCallback(
+    <Key extends keyof PartnerFormState>(
+      field: Key,
+      value: PartnerFormState[Key]
+    ) => {
+      setPartnerForm((prev) => (prev ? { ...prev, [field]: value } : prev));
+    },
+    []
+  );
 
-  const splitList = useCallback((value) => {
+  const splitList = useCallback((value: string): string[] => {
     if (!value) return [];
     return value
       .split(/[,\n]+/)
@@ -567,18 +678,20 @@ export default function AdminDashboard() {
     if (!partnerForm || !editingPartnerId || !token) return;
     setSavingPartner(true);
     try {
+      const parseNumber = (value: string): number => {
+        if (!value.trim()) {
+          return 0;
+        }
+        const numericValue = Number.parseFloat(value);
+        return Number.isFinite(numericValue) ? numericValue : 0;
+      };
+
       const payload = {
         status: partnerForm.status,
         contract: {
-          monthlyFee: partnerForm.monthlyFee
-            ? parseFloat(partnerForm.monthlyFee)
-            : 0,
-          discountRate: partnerForm.discountRate
-            ? parseFloat(partnerForm.discountRate)
-            : 0,
-          commissionRate: partnerForm.commissionRate
-            ? parseFloat(partnerForm.commissionRate)
-            : 0,
+          monthlyFee: parseNumber(partnerForm.monthlyFee),
+          discountRate: parseNumber(partnerForm.discountRate),
+          commissionRate: parseNumber(partnerForm.commissionRate),
           commissionBasis: partnerForm.commissionBasis || "discounted",
         },
         ticketing: {
@@ -610,7 +723,7 @@ export default function AdminDashboard() {
       if (!response.ok) {
         throw new Error(`Partner update failed: ${response.status}`);
       }
-      const updated = await response.json();
+      const updated: AdminPartnerDirectoryItem = await response.json();
       setPartnerDirectory((prev) =>
         prev.map((item) =>
           item.partnerId === updated.partnerId ? updated : item
@@ -1566,7 +1679,7 @@ export default function AdminDashboard() {
   );
 }
 
-function MetricCard({ title, value, subtitle, className = "", style }) {
+function MetricCard({ title, value, subtitle, className = "", style }: MetricCardProps) {
   return (
     <Card className={`group border-white/20 bg-gradient-to-br from-white/[0.06] to-white/[0.1] backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/30 hover:from-white/[0.08] hover:to-white/[0.12] overflow-hidden relative rounded-xl ${className}`} style={style}>
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
