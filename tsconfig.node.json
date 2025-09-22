@@ -5,8 +5,11 @@
     "moduleResolution": "Node",
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
+    "allowJs": true,
     "types": ["node"],
+    "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["vite.config.*", "eslint.config.*"]
+  "include": ["vite.config.*"],
+  "exclude": ["**/node_modules/**", "eslint.config.*"]
 }

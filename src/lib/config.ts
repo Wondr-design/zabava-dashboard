@@ -37,3 +37,12 @@ export const buildApiUrl = (
 
   return `${urlPath}${urlPath.includes("?") ? "&" : "?"}${query}`;
 };
+
+export const getApiConfig = () => {
+  return {
+    baseUrl: API_BASE_URL || window.location.origin,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  };
+};

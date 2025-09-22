@@ -7,6 +7,8 @@ import AdminRoute from "./components/AdminRoute";
 import InviteManager from "./pages/admin/InviteManager";
 import AdminLogin from "./pages/admin/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import RewardsManagement from "./pages/admin/RewardsManagement";
+import BonusPage from "./pages/BonusPage";
 
 function App() {
   return (
@@ -34,6 +36,14 @@ function App() {
           }
         />
         <Route
+          path="/admin/rewards"
+          element={
+            <AdminRoute>
+              <RewardsManagement />
+            </AdminRoute>
+          }
+        />
+        <Route
           path="/dashboard"
           element={
             <PrivateRoute>
@@ -41,6 +51,8 @@ function App() {
             </PrivateRoute>
           }
         />
+        {/* Public bonus page - no authentication required */}
+        <Route path="/bonus" element={<BonusPage />} />
       </Routes>
     </BrowserRouter>
   );
