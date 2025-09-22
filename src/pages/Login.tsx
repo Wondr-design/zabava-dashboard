@@ -85,11 +85,11 @@ export default function Login() {
   const showDemoBanner = Boolean(demoAccount?.email && demoAccount?.password);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 py-8 text-slate-100">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 px-4 text-slate-100">
       {/* Minimal background effects */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-900/3 via-transparent to-violet-900/3"></div>
-      <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500/[0.02] rounded-full blur-3xl"></div>
-      <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-violet-500/[0.02] rounded-full blur-3xl"></div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-900/3 via-transparent to-violet-900/3"></div>
+      <div className="pointer-events-none absolute top-1/3 left-1/2 h-96 w-96 -translate-x-1/2 bg-blue-500/[0.02] rounded-full blur-3xl"></div>
+      <div className="pointer-events-none absolute bottom-1/3 left-1/2 h-96 w-96 -translate-x-1/2 bg-violet-500/[0.02] rounded-full blur-3xl"></div>
 
       <Card className="glass-card w-full max-w-sm text-slate-100 shadow-xl hover-lift animate-scale-in rounded-2xl relative z-10 border-white/5">
         <CardHeader className="space-y-6 text-center pb-6">
@@ -172,7 +172,7 @@ export default function Login() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="px-6 pb-6 pt-4">
+        <CardFooter className="px-6 pb-6 pt-4 align-middle justify-center">
           {showDemoBanner ? (
             <div className="glass-card-light rounded-lg p-3 text-center">
               <p className="text-xs text-slate-300 mb-1">Demo credentials:</p>

@@ -103,26 +103,34 @@ export default function AdminDashboard() {
   const { user, token, logout } = useAuth();
   const isAdmin = user?.role === "admin";
 
-  const primaryButtonClass = "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
-  const secondaryButtonClass = "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
+  const primaryButtonClass =
+    "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
+  const secondaryButtonClass =
+    "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
 
   const [partners, setPartners] = useState<AdminPartnerSummary[]>([]);
   const [overviewPartner, setOverviewPartner] = useState<string>("all");
   const [overviewRefreshIndex, setOverviewRefreshIndex] = useState<number>(0);
   const [overview, setOverview] = useState<AdminAnalyticsOverview | null>(null);
   const [loadingOverview, setLoadingOverview] = useState<boolean>(false);
-  const [overviewStats, setOverviewStats] = useState<AdminOverviewResponse | null>(null);
-  const [loadingOverviewStats, setLoadingOverviewStats] = useState<boolean>(false);
+  const [overviewStats, setOverviewStats] =
+    useState<AdminOverviewResponse | null>(null);
+  const [loadingOverviewStats, setLoadingOverviewStats] =
+    useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [searchPartner, setSearchPartner] = useState<string>("");
   const [searchResults, setSearchResults] = useState<SubmissionRecord[]>([]);
   const [loadingSearch, setLoadingSearch] = useState<boolean>(false);
   const [searchTicket, setSearchTicket] = useState<string>("all");
-  const [searchVisited, setSearchVisited] = useState<SearchVisitedFilter>("all");
+  const [searchVisited, setSearchVisited] =
+    useState<SearchVisitedFilter>("all");
   const [searchStartDate, setSearchStartDate] = useState<string>("");
   const [searchEndDate, setSearchEndDate] = useState<string>("");
-  const [partnerDirectory, setPartnerDirectory] = useState<AdminPartnerDirectoryItem[]>([]);
-  const [loadingPartnerDirectory, setLoadingPartnerDirectory] = useState<boolean>(false);
+  const [partnerDirectory, setPartnerDirectory] = useState<
+    AdminPartnerDirectoryItem[]
+  >([]);
+  const [loadingPartnerDirectory, setLoadingPartnerDirectory] =
+    useState<boolean>(false);
   const [partnerSearchTerm, setPartnerSearchTerm] = useState<string>("");
   const [partnerStatusFilter, setPartnerStatusFilter] = useState<string>("all");
   const [editingPartnerId, setEditingPartnerId] = useState<string | null>(null);
@@ -392,7 +400,6 @@ export default function AdminDashboard() {
     setSearchEndDate("");
   };
 
-
   const currencyFormatter = useMemo(
     () =>
       new Intl.NumberFormat("en-US", {
@@ -447,7 +454,9 @@ export default function AdminDashboard() {
 
   const filteredSearchResults = useMemo<SubmissionRecord[]>(() => {
     return searchResults.filter((item) => {
-      const createdTime = item.createdAt ? new Date(item.createdAt).getTime() : null;
+      const createdTime = item.createdAt
+        ? new Date(item.createdAt).getTime()
+        : null;
 
       if (searchStartDate) {
         const startTime = new Date(searchStartDate).setHours(0, 0, 0, 0);
@@ -480,14 +489,23 @@ export default function AdminDashboard() {
 
       return true;
     });
-  }, [searchEndDate, searchResults, searchStartDate, searchTicket, searchVisited]);
+  }, [
+    searchEndDate,
+    searchResults,
+    searchStartDate,
+    searchTicket,
+    searchVisited,
+  ]);
 
   const filteredSearchCount = filteredSearchResults.length;
 
   const filteredPartners = useMemo<AdminPartnerDirectoryItem[]>(() => {
     const term = partnerSearchTerm.trim().toLowerCase();
     return partnerDirectory.filter((item) => {
-      if (partnerStatusFilter !== "all" && item.status !== partnerStatusFilter) {
+      if (
+        partnerStatusFilter !== "all" &&
+        item.status !== partnerStatusFilter
+      ) {
         return false;
       }
       if (term) {
@@ -508,7 +526,10 @@ export default function AdminDashboard() {
   }, [partnerDirectory, partnerSearchTerm, partnerStatusFilter]);
 
   const revenueTrend = useMemo(
-    () => (overview?.revenueTrend ?? []) as NonNullable<AdminAnalyticsOverview["revenueTrend"]>,
+    () =>
+      (overview?.revenueTrend ?? []) as NonNullable<
+        AdminAnalyticsOverview["revenueTrend"]
+      >,
     [overview]
   );
   const latest = useMemo<SubmissionRecord[]>(
@@ -591,7 +612,12 @@ export default function AdminDashboard() {
           overviewTotals.unvisitedQRCodes
         )} unconfirmed visits`,
         description: "Follow up on partners to mark recent visitors",
-        action: () => navigate("/admin/dashboard#submissions"),
+        action: () => {
+          const submissionsSection = document.getElementById("submissions");
+          if (submissionsSection) {
+            submissionsSection.scrollIntoView({ behavior: "smooth" });
+          }
+        },
       },
       {
         id: "pending-approvals",
@@ -750,954 +776,1143 @@ export default function AdminDashboard() {
         <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/3 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
         <div className="relative z-10">
-      <header className="glass-card border-b border-white/10 backdrop-blur-xl animate-fade-in sticky top-0">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">Z</span>
+          <header className="glass-card border-b border-white/10 backdrop-blur-xl sticky top-0">
+            <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center shadow-lg">
+                    <span className="text-white font-bold text-lg">Z</span>
+                  </div>
+                  <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/20 to-violet-600/20 rounded-xl blur opacity-75"></div>
+                </div>
+                <div>
+                  <h1 className="text-xl font-bold text-gradient">
+                    Admin Console
+                  </h1>
+                  <p className="text-xs text-muted-foreground">
+                    Dashboard & Analytics
+                  </p>
+                </div>
               </div>
-              <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/20 to-violet-600/20 rounded-xl blur opacity-75"></div>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-gradient">Admin Console</h1>
-              <p className="text-xs text-muted-foreground">
-                Dashboard & Analytics
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="glass-card-light rounded-xl px-3 py-2 text-center">
-              <p className="text-xs font-medium text-white">{user?.email}</p>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Admin</p>
-            </div>
-            <Button
-              onClick={() => navigate("/admin/invites")}
-              size="sm"
-              className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring"
-            >
-              Partner invites
-            </Button>
-            <Button
-              onClick={refreshOverview}
-              disabled={loadingOverview}
-              size="sm"
-              className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring disabled:opacity-50"
-            >
-              {loadingOverview ? "Refreshing..." : "Refresh"}
-            </Button>
-            <Button
-              onClick={handleLogout}
-              size="sm"
-              className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 hover:text-red-100 hover:bg-red-500/10 hover:border-red-500/20 focus-ring"
-            >
-              Logout
-            </Button>
-          </div>
-        </div>
-      </header>
-
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 animate-slide-up">
-          {heroCards.map((card, index) => (
-            <MetricCard
-              key={card.title}
-              title={card.title}
-              value={card.value}
-              subtitle={card.subtitle}
-              className="hover-lift animate-fade-in"
-              style={{ animationDelay: `${index * 0.1}s` }}
-            />
-          ))}
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 animate-scale-in">
-          {quickActionItems.map((action, index) => (
-            <Card
-              key={action.id}
-              className="glass-card hover-lift group overflow-hidden rounded-xl animate-fade-in"
-              style={{ animationDelay: `${index * 0.15}s` }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              <CardHeader className="pb-3 relative z-10">
-                <CardTitle className="text-base font-semibold text-white group-hover:text-primary transition-colors">
-                  {action.label}
-                </CardTitle>
-                <CardDescription className="text-muted-foreground group-hover:text-muted-foreground/80 transition-colors text-sm">
-                  {action.description}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="pt-0 relative z-10">
+              <div className="flex items-center gap-2">
+                <div className="glass-card-light rounded-xl px-3 py-2 text-center">
+                  <p className="text-xs font-medium text-white">
+                    {user?.email}
+                  </p>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                    Admin
+                  </p>
+                </div>
                 <Button
+                  onClick={() => navigate("/admin/invites")}
                   size="sm"
-                  className="btn-minimal rounded-lg px-4 py-1.5 focus-ring text-xs"
-                  onClick={action.action}
-                  disabled={loadingOverviewStats}
+                  className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring"
                 >
-                  {loadingOverviewStats ? "Loading..." : "View"}
+                  Partner invites
                 </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </section>
+                <Button
+                  onClick={refreshOverview}
+                  disabled={loadingOverview}
+                  size="sm"
+                  className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring disabled:opacity-50"
+                >
+                  {loadingOverview ? "Refreshing..." : "Refresh"}
+                </Button>
+                <Button
+                  onClick={handleLogout}
+                  size="sm"
+                  className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 focus-ring"
+                >
+                  Logout
+                </Button>
+              </div>
+            </div>
+          </header>
 
-        <section className="space-y-4" id="partners">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-3">
-              <Input
-                value={partnerSearchTerm}
-                onChange={(event) => setPartnerSearchTerm(event.target.value)}
-                placeholder="Search partner or contact"
-                className="w-full max-w-sm bg-white/[0.08] text-white"
+          <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-6 py-8">
+            <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+              {heroCards.map((card, index) => (
+                <MetricCard
+                  key={card.title}
+                  title={card.title}
+                  value={card.value}
+                  subtitle={card.subtitle}
+                  className=""
+                />
+              ))}
+            </section>
+
+            <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {quickActionItems.map((action, index) => (
+                <Card
+                  key={action.id}
+                  className="glass-card overflow-hidden rounded-xl"
+                >
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-base font-semibold text-white">
+                      {action.label}
+                    </CardTitle>
+                    <CardDescription className="text-muted-foreground text-sm">
+                      {action.description}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <Button
+                      size="sm"
+                      className="btn-minimal rounded-lg px-4 py-1.5 focus-ring text-xs"
+                      onClick={action.action}
+                      disabled={loadingOverviewStats}
+                    >
+                      {loadingOverviewStats ? "Loading..." : "View"}
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </section>
+
+            <section className="space-y-4" id="partners">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Input
+                    value={partnerSearchTerm}
+                    onChange={(event) =>
+                      setPartnerSearchTerm(event.target.value)
+                    }
+                    placeholder="Search partner or contact"
+                    className="w-full max-w-sm bg-white/[0.08] text-white"
+                  />
+                  <select
+                    value={partnerStatusFilter}
+                    onChange={(event) =>
+                      setPartnerStatusFilter(event.target.value)
+                    }
+                    className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
+                  >
+                    <option value="all">All statuses</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="hidden">Hidden</option>
+                  </select>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(secondaryButtonClass)}
+                    onClick={loadPartnerDirectory}
+                    disabled={loadingPartnerDirectory}
+                  >
+                    {loadingPartnerDirectory ? "Refreshing" : "Refresh list"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(primaryButtonClass)}
+                    onClick={() => navigate("/admin/invites")}
+                  >
+                    Invite partner
+                  </Button>
+                </div>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-white/10">
+                  <thead className="bg-white/[0.04]">
+                    <tr>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Partner
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Status
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Monthly fee
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Commission
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Discount
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Tickets
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Updated
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Bonus
+                      </th>
+                      <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10 bg-white/[0.02]">
+                    {loadingPartnerDirectory ? (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          className="px-3 py-4 text-sm text-slate-400"
+                        >
+                          Loading partner directory…
+                        </td>
+                      </tr>
+                    ) : filteredPartners.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={9}
+                          className="px-3 py-4 text-sm text-slate-400"
+                        >
+                          {partnerDirectory.length === 0
+                            ? "No partners yet."
+                            : "No partners match the selected filters."}
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredPartners.map((partner) => {
+                        const statusStyles = {
+                          active: "bg-emerald-500/15 text-emerald-200",
+                          pending: "bg-amber-400/15 text-amber-200",
+                          hidden: "bg-slate-500/20 text-slate-200",
+                        };
+                        const badgeClass =
+                          statusStyles[
+                            partner.status as keyof typeof statusStyles
+                          ] || "bg-slate-500/20 text-slate-200";
+
+                        return (
+                          <tr key={partner.partnerId}>
+                            <td className="px-3 py-3 text-sm text-slate-200">
+                              <div>
+                                <p className="font-semibold text-white">
+                                  {partner.partnerId.toUpperCase()}
+                                </p>
+                                {partner.info?.contactName ? (
+                                  <p className="text-xs text-slate-400">
+                                    {partner.info.contactName}
+                                  </p>
+                                ) : null}
+                                {partner.info?.contactEmail ? (
+                                  <p className="text-xs text-slate-500">
+                                    {partner.info.contactEmail}
+                                  </p>
+                                ) : null}
+                              </div>
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              <Badge className={badgeClass}>
+                                {partner.status}
+                              </Badge>
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              {currencyFormatter.format(
+                                partner.contract?.monthlyFee || 0
+                              )}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              {`${partner.contract?.commissionRate || 0}% (${
+                                partner.contract?.commissionBasis === "original"
+                                  ? "original"
+                                  : "discounted"
+                              })`}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              {`${partner.contract?.discountRate || 0}%`}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              {partner.ticketing?.ticketTypes?.length
+                                ? partner.ticketing.ticketTypes.join(", ")
+                                : "—"}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-400">
+                              {partner.updatedAt
+                                ? formatDate(partner.updatedAt)
+                                : "—"}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              {partner.bonusProgramEnabled
+                                ? "Enabled"
+                                : "Disabled"}
+                            </td>
+                            <td className="px-3 py-3 text-sm text-slate-300">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className={cn(primaryButtonClass)}
+                                onClick={() => openPartnerEditor(partner)}
+                              >
+                                Edit
+                              </Button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            <section
+              className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+              id="submissions"
+            >
+              <MetricCard
+                title="Total submissions"
+                value={numberFormatter.format(analyticsTotals.count)}
+                subtitle={`${numberFormatter.format(
+                  analyticsTotals.used
+                )} used • ${numberFormatter.format(
+                  analyticsTotals.unused
+                )} pending`}
               />
+              <MetricCard
+                title="Conversion rate"
+                value={`${conversionRate}%`}
+                subtitle="Usage of distributed tickets"
+              />
+              <MetricCard
+                title="Total revenue"
+                value={currencyFormatter.format(analyticsTotals.revenue)}
+                subtitle={`Avg ${currencyFormatterDetailed.format(
+                  analyticsTotals.averageRevenue
+                )} per submission`}
+              />
+              <MetricCard
+                title="Visits confirmed"
+                value={`${numberFormatter.format(
+                  analyticsTotals.visited
+                )} (${visitRate}%)`}
+                subtitle={`${numberFormatter.format(
+                  analyticsTotals.notVisited
+                )} awaiting confirmation`}
+              />
+            </section>
+
+            <section className="flex flex-wrap items-center gap-3">
+              <span className="text-xs uppercase tracking-[0.25em] text-slate-500">
+                Dataset
+              </span>
               <select
-                value={partnerStatusFilter}
-                onChange={(event) => setPartnerStatusFilter(event.target.value)}
+                value={overviewPartner || "all"}
+                onChange={(event) => setOverviewPartner(event.target.value)}
                 className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
               >
-                <option value="all">All statuses</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(secondaryButtonClass)}
-                onClick={loadPartnerDirectory}
-                disabled={loadingPartnerDirectory}
-              >
-                {loadingPartnerDirectory ? "Refreshing" : "Refresh list"}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(primaryButtonClass)}
-                onClick={() => navigate("/admin/invites")}
-              >
-                Invite partner
-              </Button>
-            </div>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-white/10">
-              <thead className="bg-white/[0.04]">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Partner
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Status
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Monthly fee
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Commission
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Discount
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Tickets
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Updated
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Bonus
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10 bg-white/[0.02]">
-                {loadingPartnerDirectory ? (
-                  <tr>
-                    <td colSpan={9} className="px-3 py-4 text-sm text-slate-400">
-                      Loading partner directory…
-                    </td>
-                  </tr>
-                ) : filteredPartners.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="px-3 py-4 text-sm text-slate-400">
-                      {partnerDirectory.length === 0
-                        ? "No partners yet."
-                        : "No partners match the selected filters."}
-                    </td>
-                  </tr>
-                ) : (
-                  filteredPartners.map((partner) => {
-                    const statusStyles = {
-                      active: "bg-emerald-500/15 text-emerald-200",
-                      pending: "bg-amber-400/15 text-amber-200",
-                      hidden: "bg-slate-500/20 text-slate-200",
-                    };
-                    const badgeClass =
-                      statusStyles[partner.status] || "bg-slate-500/20 text-slate-200";
-
-                    return (
-                      <tr key={partner.partnerId}>
-                        <td className="px-3 py-3 text-sm text-slate-200">
-                          <div className="space-y-1">
-                            <p className="font-semibold text-white">
-                              {partner.partnerId.toUpperCase()}
-                            </p>
-                            {partner.info?.contactName ? (
-                              <p className="text-xs text-slate-400">
-                                {partner.info.contactName}
-                              </p>
-                            ) : null}
-                            {partner.info?.contactEmail ? (
-                              <p className="text-xs text-slate-500">
-                                {partner.info.contactEmail}
-                              </p>
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          <Badge className={badgeClass}>{partner.status}</Badge>
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          {currencyFormatter.format(
-                            partner.contract?.monthlyFee || 0
-                          )}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          {`${partner.contract?.commissionRate || 0}% (${
-                            partner.contract?.commissionBasis === "original"
-                              ? "original"
-                              : "discounted"
-                          })`}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          {`${partner.contract?.discountRate || 0}%`}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          {partner.ticketing?.ticketTypes?.length
-                            ? partner.ticketing.ticketTypes.join(", ")
-                            : "—"}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-400">
-                          {partner.updatedAt ? formatDate(partner.updatedAt) : "—"}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          {partner.bonusProgramEnabled ? "Enabled" : "Disabled"}
-                        </td>
-                        <td className="px-3 py-3 text-sm text-slate-300">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className={cn(primaryButtonClass)}
-                            onClick={() => openPartnerEditor(partner)}
-                          >
-                            Edit
-                          </Button>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard
-            title="Total submissions"
-            value={numberFormatter.format(analyticsTotals.count)}
-            subtitle={`${numberFormatter.format(analyticsTotals.used)} used • ${numberFormatter.format(
-              analyticsTotals.unused
-            )} pending`}
-          />
-          <MetricCard
-            title="Conversion rate"
-            value={`${conversionRate}%`}
-            subtitle="Usage of distributed tickets"
-          />
-          <MetricCard
-            title="Total revenue"
-            value={currencyFormatter.format(analyticsTotals.revenue)}
-            subtitle={`Avg ${currencyFormatterDetailed.format(
-              analyticsTotals.averageRevenue
-            )} per submission`}
-          />
-          <MetricCard
-            title="Visits confirmed"
-            value={`${numberFormatter.format(analyticsTotals.visited)} (${visitRate}%)`}
-            subtitle={`${numberFormatter.format(analyticsTotals.notVisited)} awaiting confirmation`}
-          />
-        </section>
-
-        <section className="flex flex-wrap items-center gap-3">
-          <span className="text-xs uppercase tracking-[0.25em] text-slate-500">
-            Dataset
-          </span>
-          <select
-            value={overviewPartner || "all"}
-            onChange={(event) => setOverviewPartner(event.target.value)}
-            className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
-          >
-            <option value="all">All partners</option>
-            {partners.map((partner) => (
-              <option key={partner.id} value={partner.id}>
-                {partner.id}
-              </option>
-            ))}
-          </select>
-        </section>
-
-        <section className="grid gap-4 xl:grid-cols-5 animate-scale-in">
-          <Card className="glass-card hover-lift xl:col-span-2 rounded-xl">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-bold text-gradient">
-                Global revenue trend
-              </CardTitle>
-              <CardDescription className="text-muted-foreground text-sm">Aggregated submissions by day</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[320px] px-0 pb-0">
-              {loadingOverview && !overview ? (
-                <Skeleton className="h-full w-full bg-white/10" />
-              ) : revenueTrend.length ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={revenueTrend}>
-                    <XAxis
-                      dataKey="date"
-                      stroke="rgba(148, 163, 184, 0.4)"
-                      tickLine={false}
-                      tick={{ fill: "rgba(226, 232, 240, 0.75)", fontSize: 12 }}
-                    />
-                    <YAxis
-                      stroke="rgba(148, 163, 184, 0.4)"
-                      tickFormatter={(value) =>
-                        currencyFormatter.format(value).replace("$", "")
-                      }
-                      width={60}
-                      tickLine={false}
-                      tick={{ fill: "rgba(226, 232, 240, 0.75)", fontSize: 12 }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        background: "rgba(15, 23, 42, 0.92)",
-                        borderRadius: 12,
-                        border: "1px solid rgba(148, 163, 184, 0.25)",
-                        color: "#e2e8f0",
-                      }}
-                      formatter={(value) => currencyFormatter.format(value)}
-                    />
-                    <Legend
-                      wrapperStyle={{
-                        color: "rgba(226, 232, 240, 0.8)",
-                        paddingTop: 12,
-                      }}
-                    />
-                    <Line
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#38bdf8"
-                      strokeWidth={3}
-                      dot={false}
-                      name="Revenue"
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="flex h-full items-center justify-center text-sm text-slate-400">
-                  Not enough data yet.
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Modern Partner Summary with fixed height and scroll */}
-          <Card className="glass-card hover-lift xl:col-span-3 rounded-xl">
-            <CardHeader className="pb-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-lg font-bold text-gradient">Partner summary</CardTitle>
-                  <CardDescription className="text-muted-foreground text-sm">Snapshot of partner performance</CardDescription>
-                </div>
-                {partnerSummary.length > 0 && (
-                  <div className="flex items-center gap-2">
-                    <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
-                    <span className="text-sm font-medium text-slate-300">
-                      {partnerSummary.length} partner{partnerSummary.length !== 1 ? 's' : ''}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </CardHeader>
-            <CardContent className="px-0 pb-0">
-              {partnerSummary.length === 0 ? (
-                <div className="px-6 pb-6">
-                  <p className="text-sm text-slate-400">No partners available.</p>
-                </div>
-              ) : (
-                <div className="relative">
-                  {/* Scroll container with fixed height */}
-                  <div className="max-h-80 overflow-y-auto px-6 pb-6 partner-summary-scroll">
-                    <div className="space-y-2">
-                      {partnerSummary.map((item) => {
-                        const hasRevenue = item.metrics.revenue > 0;
-                        const conversionRate = item.metrics.count > 0 
-                          ? Math.round((item.metrics.used / item.metrics.count) * 100) 
-                          : 0;
-                        
-                        return (
-                          <div
-                            key={item.id}
-                            className="group flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 sm:px-4 transition-all duration-200 hover:border-white/20 hover:bg-white/[0.06]"
-                          >
-                            <div className="flex items-center space-x-2 sm:space-x-3">
-                              {/* Partner Avatar/Initial */}
-                              <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-xs sm:text-sm font-semibold text-white">
-                                {item.id.substring(0, 2).toUpperCase()}
-                              </div>
-                              
-                              {/* Partner Info */}
-                              <div className="min-w-0 flex-1">
-                                <div className="flex items-center space-x-2">
-                                  <p className="font-semibold text-white text-xs sm:text-sm">
-                                    {item.id.toUpperCase()}
-                                  </p>
-                                  {conversionRate > 0 && (
-                                    <span className="inline-flex items-center rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-xs font-medium text-emerald-200">
-                                      {conversionRate}%
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="flex items-center space-x-3 text-xs text-slate-400">
-                                  <span>{numberFormatter.format(item.metrics.count)} submissions</span>
-                                  <span>•</span>
-                                  <span>
-                                    {numberFormatter.format(item.metrics.used)} used
-                                    {item.metrics.unused > 0 && (
-                                      <span className="text-amber-300"> ({item.metrics.unused} pending)</span>
-                                    )}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                            
-                            {/* Revenue and Date */}
-                            <div className="text-right">
-                              <p className={`text-xs sm:text-sm font-medium ${
-                                hasRevenue ? 'text-emerald-300' : 'text-slate-400'
-                              }`}>
-                                {currencyFormatter.format(item.metrics.revenue)}
-                              </p>
-                              <p className="text-xs text-slate-500">
-                                {item.lastSubmissionAt 
-                                  ? formatDate(item.lastSubmissionAt).split(',')[0] // Show only date, not time
-                                  : '—'
-                                }
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                  
-                  {/* Scroll indicator gradients */}
-                  {partnerSummary.length > 6 && (
-                    <>
-                      <div className="pointer-events-none absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-slate-950/20 to-transparent" />
-                      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-950/20 to-transparent" />
-                    </>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </section>
-
-        <Card className="border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg font-semibold text-white">Latest submissions</CardTitle>
-            <CardDescription className="text-slate-400">Most recent activity across partners</CardDescription>
-          </CardHeader>
-          <CardContent className="overflow-x-auto px-0">
-            <table className="min-w-full divide-y divide-white/20">
-              <thead className="bg-white/[0.08]">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    Partner
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    Email
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    Ticket
-                  </th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    Total
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    QR Status
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    Visit
-                  </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
-                    Created
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/10 bg-white/[0.04]">
-                {latest.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="px-4 py-6 text-center text-sm text-slate-400">
-                      No submissions yet.
-                    </td>
-                  </tr>
-                ) : (
-                  latest.slice(0, 12).map((item, index) => (
-                      <tr key={`${item.partnerId}-${item.email}-${index}`} className="hover:bg-white/[0.06] transition-colors duration-150">
-                        <td className="px-4 py-3 text-sm font-medium text-slate-100">{item.partnerId}</td>
-                        <td className="px-4 py-3 text-sm text-slate-200">{item.email}</td>
-                        <td className="px-4 py-3 text-sm text-slate-300">{item.ticket || "N/A"}</td>
-                        <td className="px-4 py-3 text-right text-sm font-medium text-slate-200">
-                          {currencyFormatter.format(item.totalPrice || 0)}
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-300">{item.used ? "Used" : "Pending"}</td>
-                        <td className="px-4 py-3 text-sm text-slate-300">
-                          <div className="flex flex-col gap-1">
-                            <span
-                              className={`inline-flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm ${
-                                item.visited
-                                  ? "bg-emerald-500/20 text-emerald-100 border border-emerald-500/30"
-                                  : "bg-amber-400/20 text-amber-100 border border-amber-400/30"
-                              }`}
-                            >
-                              <div className={`h-1.5 w-1.5 rounded-full ${
-                                item.visited ? "bg-emerald-400" : "bg-amber-400"
-                              }`}></div>
-                              {item.visited ? "Visited" : "Unconfirmed"}
-                            </span>
-                            {item.visitedAt ? (
-                              <span className="text-xs text-slate-400 font-medium">
-                                {formatDate(item.visitedAt)}
-                              </span>
-                            ) : null}
-                          </div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-slate-400 font-medium">{formatDate(item.createdAt)}</td>
-                      </tr>
-                    ))
-                )}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
-
-        <Card className="border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl">
-          <CardHeader className="flex flex-wrap items-center justify-between gap-4 pb-4">
-            <div>
-              <CardTitle className="text-lg font-semibold text-white">Search submissions</CardTitle>
-              <CardDescription className="text-slate-400">
-                Filter by partner or email keyword and export results.
-              </CardDescription>
-            </div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleExport}
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0 hover:from-emerald-700 hover:to-teal-700 shadow-lg font-medium px-4 py-2.5 rounded-lg transition-all duration-200"
-            >
-              Download CSV
-            </Button>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <Input
-                value={searchTerm}
-                onChange={(event) => setSearchTerm(event.target.value)}
-                placeholder="Search by email, ticket, partner..."
-                className="w-full max-w-sm bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200 rounded-lg shadow-sm"
-              />
-              <select
-                className="rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all duration-200"
-                value={searchPartner}
-                onChange={(event) => setSearchPartner(event.target.value)}
-              >
-                <option value="">All partners</option>
+                <option value="all">All partners</option>
                 {partners.map((partner) => (
                   <option key={partner.id} value={partner.id}>
                     {partner.id}
                   </option>
                 ))}
               </select>
-              <span className="text-xs text-slate-500">
-                Type at least two characters to search globally.
-              </span>
-            </div>
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  Ticket type
-                </label>
-                <select
-                  className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
-                  value={searchTicket}
-                  onChange={(event) => setSearchTicket(event.target.value)}
-                >
-                  <option value="all">All tickets</option>
-                  {searchTicketOptions.map((ticket) => (
-                    <option key={ticket} value={ticket}>
-                      {ticket}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  Visit status
-                </label>
-                <select
-                  className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
-                  value={searchVisited}
-                  onChange={(event) => setSearchVisited(event.target.value)}
-                >
-                  <option value="all">All</option>
-                  <option value="visited">Visited</option>
-                  <option value="unvisited">Awaiting visit</option>
-                </select>
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  From
-                </label>
-                <Input
-                  type="date"
-                  value={searchStartDate}
-                  onChange={(event) => setSearchStartDate(event.target.value)}
-                  className="bg-white/[0.08] text-white"
-                />
-              </div>
-              <div className="flex flex-col gap-1">
-                <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                  To
-                </label>
-                <Input
-                  type="date"
-                  value={searchEndDate}
-                  onChange={(event) => setSearchEndDate(event.target.value)}
-                  className="bg-white/[0.08] text-white"
-                />
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
-              <span>Showing {numberFormatter.format(filteredSearchCount)} results</span>
-              <Button
-                variant="outline"
-                size="sm"
-                className={cn(secondaryButtonClass)}
-                onClick={resetSearchFilters}
-              >
-                Reset filters
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-white/10">
-                <thead className="bg-white/[0.04]">
-                  <tr>
-                    <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                      Partner
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                      Email
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                      Ticket
-                    </th>
-                    <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wider text-slate-300">
-                      Total
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                      QR Status
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                      Visit
-                    </th>
-                    <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
-                      Created
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-white/10 bg-white/[0.02]">
-                  {loadingSearch ? (
-                    <tr>
-                      <td colSpan={7} className="px-3 py-4 text-center text-sm text-slate-400">
-                        Searching…
-                      </td>
-                    </tr>
-                  ) : filteredSearchResults.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="px-3 py-4 text-center text-sm text-slate-400">
-                        {searchResults.length === 0
-                          ? searchTerm.trim().length < 2 && !searchPartner
-                            ? "Enter at least two characters to search."
-                            : "No submissions matched your criteria."
-                          : "No submissions match the selected filters."}
-                      </td>
-                    </tr>
+            </section>
+
+            <section className="grid gap-4 xl:grid-cols-5">
+              <Card className="glass-card xl:col-span-2 rounded-xl">
+                <CardHeader className="pb-4">
+                  <CardTitle className="text-lg font-bold text-gradient">
+                    Global revenue trend
+                  </CardTitle>
+                  <CardDescription className="text-muted-foreground text-sm">
+                    Aggregated submissions by day
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="h-[320px] px-0 pb-0">
+                  {loadingOverview && !overview ? (
+                    <Skeleton className="h-full w-full bg-white/10" />
+                  ) : revenueTrend.length ? (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <LineChart data={revenueTrend}>
+                        <XAxis
+                          dataKey="date"
+                          stroke="rgba(148, 163, 184, 0.4)"
+                          tickLine={false}
+                          tick={{
+                            fill: "rgba(226, 232, 240, 0.75)",
+                            fontSize: 12,
+                          }}
+                        />
+                        <YAxis
+                          stroke="rgba(148, 163, 184, 0.4)"
+                          tickFormatter={(value) =>
+                            currencyFormatter.format(value).replace("$", "")
+                          }
+                          width={60}
+                          tickLine={false}
+                          tick={{
+                            fill: "rgba(226, 232, 240, 0.75)",
+                            fontSize: 12,
+                          }}
+                        />
+                        <Tooltip
+                          contentStyle={{
+                            background: "rgba(15, 23, 42, 0.92)",
+                            borderRadius: 12,
+                            border: "1px solid rgba(148, 163, 184, 0.25)",
+                            color: "#e2e8f0",
+                          }}
+                          formatter={(value) =>
+                            currencyFormatter.format(Number(value))
+                          }
+                        />
+                        <Legend
+                          wrapperStyle={{
+                            color: "rgba(226, 232, 240, 0.8)",
+                            paddingTop: 12,
+                          }}
+                        />
+                        <Line
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#38bdf8"
+                          strokeWidth={3}
+                          dot={false}
+                          name="Revenue"
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
                   ) : (
-                    filteredSearchResults.map((item, index) => (
-                        <tr key={`${item.partnerId}-${item.email}-${index}`}>
-                          <td className="px-3 py-2 text-sm text-slate-200">{item.partnerId}</td>
-                          <td className="px-3 py-2 text-sm text-slate-300">{item.email}</td>
-                          <td className="px-3 py-2 text-sm text-slate-300">{item.ticket || "N/A"}</td>
-                          <td className="px-3 py-2 text-right text-sm text-slate-300">
+                    <div className="flex h-full items-center justify-center text-sm text-slate-400">
+                      Not enough data yet.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* Modern Partner Summary with fixed height and scroll */}
+              <Card className="glass-card xl:col-span-3 rounded-xl">
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg font-bold text-gradient">
+                        Partner summary
+                      </CardTitle>
+                      <CardDescription className="text-muted-foreground text-sm">
+                        Snapshot of partner performance
+                      </CardDescription>
+                    </div>
+                    {partnerSummary.length > 0 && (
+                      <div className="flex items-center gap-2">
+                        <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
+                        <span className="text-sm font-medium text-slate-300">
+                          {partnerSummary.length} partner
+                          {partnerSummary.length !== 1 ? "s" : ""}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="px-0 pb-0">
+                  {partnerSummary.length === 0 ? (
+                    <div className="px-6 pb-6">
+                      <p className="text-sm text-slate-400">
+                        No partners available.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      {/* Scroll container with fixed height */}
+                      <div className="max-h-80 overflow-y-auto px-6 pb-6 partner-summary-scroll">
+                        <div className="space-y-2">
+                          {partnerSummary.map((item) => {
+                            const hasRevenue = item.metrics.revenue > 0;
+                            const conversionRate =
+                              item.metrics.count > 0
+                                ? Math.round(
+                                    (item.metrics.used / item.metrics.count) *
+                                      100
+                                  )
+                                : 0;
+
+                            return (
+                              <div
+                                key={item.id}
+                                className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3 sm:px-4"
+                              >
+                                <div className="flex items-center space-x-2 sm:space-x-3">
+                                  {/* Partner Avatar/Initial */}
+                                  <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-xs sm:text-sm font-semibold text-white">
+                                    {item.id.substring(0, 2).toUpperCase()}
+                                  </div>
+
+                                  {/* Partner Info */}
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center space-x-2">
+                                      <p className="font-semibold text-white text-xs sm:text-sm">
+                                        {item.id.toUpperCase()}
+                                      </p>
+                                      {conversionRate > 0 && (
+                                        <span className="inline-flex items-center rounded-md bg-emerald-500/15 px-1.5 py-0.5 text-xs font-medium text-emerald-200">
+                                          {conversionRate}%
+                                        </span>
+                                      )}
+                                    </div>
+                                    <div className="flex items-center space-x-3 text-xs text-slate-400">
+                                      <span>
+                                        {numberFormatter.format(
+                                          item.metrics.count
+                                        )}{" "}
+                                        submissions
+                                      </span>
+                                      <span>•</span>
+                                      <span>
+                                        {numberFormatter.format(
+                                          item.metrics.used
+                                        )}{" "}
+                                        used
+                                        {item.metrics.unused > 0 && (
+                                          <span className="text-amber-300">
+                                            {" "}
+                                            ({item.metrics.unused} pending)
+                                          </span>
+                                        )}
+                                      </span>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* Revenue and Date */}
+                                <div className="text-right">
+                                  <p
+                                    className={`text-xs sm:text-sm font-medium ${
+                                      hasRevenue
+                                        ? "text-emerald-300"
+                                        : "text-slate-400"
+                                    }`}
+                                  >
+                                    {currencyFormatter.format(
+                                      item.metrics.revenue
+                                    )}
+                                  </p>
+                                  <p className="text-xs text-slate-500">
+                                    {item.lastSubmissionAt
+                                      ? formatDate(item.lastSubmissionAt).split(
+                                          ","
+                                        )[0] // Show only date, not time
+                                      : "—"}
+                                  </p>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Scroll indicator gradients */}
+                      {partnerSummary.length > 6 && (
+                        <>
+                          <div className="pointer-events-none absolute top-0 left-0 right-0 h-4 bg-gradient-to-b from-slate-950/20 to-transparent" />
+                          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-4 bg-gradient-to-t from-slate-950/20 to-transparent" />
+                        </>
+                      )}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </section>
+
+            <Card className="border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-lg font-semibold text-white">
+                  Latest submissions
+                </CardTitle>
+                <CardDescription className="text-slate-400">
+                  Most recent activity across partners
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="overflow-x-auto px-0">
+                <table className="min-w-full divide-y divide-white/20">
+                  <thead className="bg-white/[0.08]">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        Partner
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        Email
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        Ticket
+                      </th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        Total
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        QR Status
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        Visit
+                      </th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-200">
+                        Created
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/10 bg-white/[0.04]">
+                    {latest.length === 0 ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="px-4 py-6 text-center text-sm text-slate-400"
+                        >
+                          No submissions yet.
+                        </td>
+                      </tr>
+                    ) : (
+                      latest.slice(0, 12).map((item, index) => (
+                        <tr
+                          key={`${item.partnerId}-${item.email}-${index}`}
+                          className=""
+                        >
+                          <td className="px-4 py-3 text-sm font-medium text-slate-100">
+                            {String(item.partnerId)}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-200">
+                            {item.email}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-300">
+                            {item.ticket || "N/A"}
+                          </td>
+                          <td className="px-4 py-3 text-right text-sm font-medium text-slate-200">
                             {currencyFormatter.format(item.totalPrice || 0)}
                           </td>
-                          <td className="px-3 py-2 text-sm text-slate-300">{item.used ? "Used" : "Pending"}</td>
-                          <td className="px-3 py-2 text-sm text-slate-300">
+                          <td className="px-4 py-3 text-sm text-slate-300">
+                            {item.used ? "Used" : "Pending"}
+                          </td>
+                          <td className="px-4 py-3 text-sm text-slate-300">
                             <div className="flex flex-col gap-1">
                               <span
-                                className={`inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                className={`inline-flex w-fit items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold shadow-sm ${
                                   item.visited
-                                    ? "bg-emerald-500/15 text-emerald-200"
-                                    : "bg-amber-400/15 text-amber-200"
+                                    ? "bg-emerald-500/20 text-emerald-100 border border-emerald-500/30"
+                                    : "bg-amber-400/20 text-amber-100 border border-amber-400/30"
                                 }`}
                               >
+                                <div
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    item.visited
+                                      ? "bg-emerald-400"
+                                      : "bg-amber-400"
+                                  }`}
+                                ></div>
                                 {item.visited ? "Visited" : "Unconfirmed"}
                               </span>
                               {item.visitedAt ? (
-                                <span className="text-xs text-slate-400">
+                                <span className="text-xs text-slate-400 font-medium">
                                   {formatDate(item.visitedAt)}
                                 </span>
                               ) : null}
                             </div>
                           </td>
-                          <td className="px-3 py-2 text-sm text-slate-400">{formatDate(item.createdAt)}</td>
+                          <td className="px-4 py-3 text-sm text-slate-400 font-medium">
+                            {formatDate(item.createdAt)}
+                          </td>
                         </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
-      </main>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </CardContent>
+            </Card>
+
+            <Card className="border-white/20 bg-gradient-to-br from-white/[0.08] to-white/[0.12] backdrop-blur-xl shadow-xl">
+              <CardHeader className="flex flex-wrap items-center justify-between gap-4 pb-4">
+                <div>
+                  <CardTitle className="text-lg font-semibold text-white">
+                    Search submissions
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    Filter by partner or email keyword and export results.
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleExport}
+                  className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white border-0 shadow-lg font-medium px-4 py-2.5 rounded-lg"
+                >
+                  Download CSV
+                </Button>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap items-center gap-3">
+                  <Input
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search by email, ticket, partner..."
+                    className="w-full max-w-sm bg-white/10 border-white/20 text-white placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 rounded-lg shadow-sm"
+                  />
+                  <select
+                    className="rounded-lg border border-white/20 bg-white/10 px-4 py-2.5 text-sm text-white shadow-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                    value={searchPartner}
+                    onChange={(event) => setSearchPartner(event.target.value)}
+                  >
+                    <option value="">All partners</option>
+                    {partners.map((partner) => (
+                      <option key={partner.id} value={partner.id}>
+                        {partner.id}
+                      </option>
+                    ))}
+                  </select>
+                  <span className="text-xs text-slate-500">
+                    Type at least two characters to search globally.
+                  </span>
+                </div>
+                <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      Ticket type
+                    </label>
+                    <select
+                      className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
+                      value={searchTicket}
+                      onChange={(event) => setSearchTicket(event.target.value)}
+                    >
+                      <option value="all">All tickets</option>
+                      {searchTicketOptions.map((ticket) => (
+                        <option key={ticket} value={ticket}>
+                          {ticket}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      Visit status
+                    </label>
+                    <select
+                      className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
+                      value={searchVisited}
+                      onChange={(event) =>
+                        setSearchVisited(
+                          event.target.value as SearchVisitedFilter
+                        )
+                      }
+                    >
+                      <option value="all">All</option>
+                      <option value="visited">Visited</option>
+                      <option value="unvisited">Awaiting visit</option>
+                    </select>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      From
+                    </label>
+                    <Input
+                      type="date"
+                      value={searchStartDate}
+                      onChange={(event) =>
+                        setSearchStartDate(event.target.value)
+                      }
+                      className="bg-white/[0.08] text-white"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                      To
+                    </label>
+                    <Input
+                      type="date"
+                      value={searchEndDate}
+                      onChange={(event) => setSearchEndDate(event.target.value)}
+                      className="bg-white/[0.08] text-white"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
+                  <span>
+                    Showing {numberFormatter.format(filteredSearchCount)}{" "}
+                    results
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(secondaryButtonClass)}
+                    onClick={resetSearchFilters}
+                  >
+                    Reset filters
+                  </Button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y divide-white/10">
+                    <thead className="bg-white/[0.04]">
+                      <tr>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                          Partner
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                          Email
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                          Ticket
+                        </th>
+                        <th className="px-3 py-2 text-right text-xs font-medium uppercase tracking-wider text-slate-300">
+                          Total
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                          QR Status
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                          Visit
+                        </th>
+                        <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
+                          Created
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/10 bg-white/[0.02]">
+                      {loadingSearch ? (
+                        <tr>
+                          <td
+                            colSpan={7}
+                            className="px-3 py-4 text-center text-sm text-slate-400"
+                          >
+                            Searching…
+                          </td>
+                        </tr>
+                      ) : filteredSearchResults.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan={7}
+                            className="px-3 py-4 text-center text-sm text-slate-400"
+                          >
+                            {searchResults.length === 0
+                              ? searchTerm.trim().length < 2 && !searchPartner
+                                ? "Enter at least two characters to search."
+                                : "No submissions matched your criteria."
+                              : "No submissions match the selected filters."}
+                          </td>
+                        </tr>
+                      ) : (
+                        filteredSearchResults.map((item, index) => (
+                          <tr key={`${item.partnerId}-${item.email}-${index}`}>
+                            <td className="px-3 py-2 text-sm text-slate-200">
+                              {String(item.partnerId)}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-slate-300">
+                              {item.email}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-slate-300">
+                              {item.ticket || "N/A"}
+                            </td>
+                            <td className="px-3 py-2 text-right text-sm text-slate-300">
+                              {currencyFormatter.format(item.totalPrice || 0)}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-slate-300">
+                              {item.used ? "Used" : "Pending"}
+                            </td>
+                            <td className="px-3 py-2 text-sm text-slate-300">
+                              <div className="flex flex-col gap-1">
+                                <span
+                                  className={`inline-flex w-fit items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                    item.visited
+                                      ? "bg-emerald-500/15 text-emerald-200"
+                                      : "bg-amber-400/15 text-amber-200"
+                                  }`}
+                                >
+                                  {item.visited ? "Visited" : "Unconfirmed"}
+                                </span>
+                                {item.visitedAt ? (
+                                  <span className="text-xs text-slate-400">
+                                    {formatDate(item.visitedAt)}
+                                  </span>
+                                ) : null}
+                              </div>
+                            </td>
+                            <td className="px-3 py-2 text-sm text-slate-400">
+                              {formatDate(item.createdAt)}
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          </main>
         </div>
       </div>
 
-    <Dialog open={Boolean(editingPartnerId)} onOpenChange={(open) => (open ? null : closePartnerEditor())}>
-      {partnerForm ? (
-        <DialogContent className="bg-white/[0.08] text-white" showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Edit partner settings</DialogTitle>
-            <DialogDescription className="text-slate-400">
-              Adjust contract terms and business details for {partnerForm.partnerId.toUpperCase()}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-6">
-            <div className="grid gap-2">
-              <Label htmlFor="partner-status">Status</Label>
-              <select
-                id="partner-status"
-                value={partnerForm.status}
-                onChange={(event) => handlePartnerFieldChange("status", event.target.value)}
-                className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
-              >
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="hidden">Hidden</option>
-              </select>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
+      <Dialog
+        open={Boolean(editingPartnerId)}
+        onOpenChange={(open) => (open ? null : closePartnerEditor())}
+      >
+        {partnerForm ? (
+          <DialogContent
+            className="bg-slate-900 text-white"
+            showCloseButton={false}
+          >
+            <DialogHeader>
+              <DialogTitle>Edit partner settings</DialogTitle>
+              <DialogDescription className="text-slate-400">
+                Adjust contract terms and business details for{" "}
+                {partnerForm.partnerId.toUpperCase()}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="partner-monthly-fee">Monthly fee (CZK)</Label>
-                <Input
-                  id="partner-monthly-fee"
-                  value={partnerForm.monthlyFee}
-                  onChange={(event) => handlePartnerFieldChange("monthlyFee", event.target.value)}
-                  placeholder="0"
-                  className="bg-white/[0.08] text-white"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="partner-discount">Discount %</Label>
-                <Input
-                  id="partner-discount"
-                  value={partnerForm.discountRate}
-                  onChange={(event) => handlePartnerFieldChange("discountRate", event.target.value)}
-                  placeholder="0"
-                  className="bg-white/[0.08] text-white"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="partner-commission">Commission %</Label>
-                <Input
-                  id="partner-commission"
-                  value={partnerForm.commissionRate}
-                  onChange={(event) => handlePartnerFieldChange("commissionRate", event.target.value)}
-                  placeholder="0"
-                  className="bg-white/[0.08] text-white"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="partner-commission-basis">Commission basis</Label>
+                <Label htmlFor="partner-status">Status</Label>
                 <select
-                  id="partner-commission-basis"
-                  value={partnerForm.commissionBasis}
-                  onChange={(event) => handlePartnerFieldChange("commissionBasis", event.target.value)}
+                  id="partner-status"
+                  value={partnerForm.status}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("status", event.target.value)
+                  }
                   className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
                 >
-                  <option value="discounted">Discounted price</option>
-                  <option value="original">Original price</option>
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                  <option value="hidden">Hidden</option>
                 </select>
               </div>
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="partner-ticket-types">Ticket types (comma separated)</Label>
-              <Input
-                id="partner-ticket-types"
-                value={partnerForm.ticketTypes}
-                onChange={(event) => handlePartnerFieldChange("ticketTypes", event.target.value)}
-                placeholder="Adult, Child, Family"
-                className="bg-white/[0.08] text-white"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="partner-family-rule">Family ticket rule</Label>
-              <Input
-                id="partner-family-rule"
-                value={partnerForm.familyRule}
-                onChange={(event) => handlePartnerFieldChange("familyRule", event.target.value)}
-                placeholder="e.g. Minimum 4 guests"
-                className="bg-white/[0.08] text-white"
-              />
-            </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="partner-monthly-fee">Monthly fee (CZK)</Label>
+                  <Input
+                    id="partner-monthly-fee"
+                    value={partnerForm.monthlyFee}
+                    onChange={(event) =>
+                      handlePartnerFieldChange("monthlyFee", event.target.value)
+                    }
+                    placeholder="0"
+                    className="bg-white/[0.08] text-white"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="partner-discount">Discount %</Label>
+                  <Input
+                    id="partner-discount"
+                    value={partnerForm.discountRate}
+                    onChange={(event) =>
+                      handlePartnerFieldChange(
+                        "discountRate",
+                        event.target.value
+                      )
+                    }
+                    placeholder="0"
+                    className="bg-white/[0.08] text-white"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="partner-commission">Commission %</Label>
+                  <Input
+                    id="partner-commission"
+                    value={partnerForm.commissionRate}
+                    onChange={(event) =>
+                      handlePartnerFieldChange(
+                        "commissionRate",
+                        event.target.value
+                      )
+                    }
+                    placeholder="0"
+                    className="bg-white/[0.08] text-white"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="partner-commission-basis">
+                    Commission basis
+                  </Label>
+                  <select
+                    id="partner-commission-basis"
+                    value={partnerForm.commissionBasis}
+                    onChange={(event) =>
+                      handlePartnerFieldChange(
+                        "commissionBasis",
+                        event.target.value
+                      )
+                    }
+                    className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
+                  >
+                    <option value="discounted">Discounted price</option>
+                    <option value="original">Original price</option>
+                  </select>
+                </div>
+              </div>
 
-            <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label htmlFor="partner-contact-name">Contact name</Label>
+                <Label htmlFor="partner-ticket-types">
+                  Ticket types (comma separated)
+                </Label>
                 <Input
-                  id="partner-contact-name"
-                  value={partnerForm.contactName}
-                  onChange={(event) => handlePartnerFieldChange("contactName", event.target.value)}
+                  id="partner-ticket-types"
+                  value={partnerForm.ticketTypes}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("ticketTypes", event.target.value)
+                  }
+                  placeholder="Adult, Child, Family"
                   className="bg-white/[0.08] text-white"
                 />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="partner-contact-email">Contact email</Label>
+                <Label htmlFor="partner-family-rule">Family ticket rule</Label>
                 <Input
-                  id="partner-contact-email"
-                  value={partnerForm.contactEmail}
-                  onChange={(event) => handlePartnerFieldChange("contactEmail", event.target.value)}
+                  id="partner-family-rule"
+                  value={partnerForm.familyRule}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("familyRule", event.target.value)
+                  }
+                  placeholder="e.g. Minimum 4 guests"
                   className="bg-white/[0.08] text-white"
                 />
               </div>
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="partner-payments">Accepted payments (comma or newline separated)</Label>
-              <Textarea
-                id="partner-payments"
-                value={partnerForm.payments}
-                onChange={(event) => handlePartnerFieldChange("payments", event.target.value)}
-                className="bg-white/[0.08] text-white"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="partner-facilities">Facilities (comma or newline separated)</Label>
-              <Textarea
-                id="partner-facilities"
-                value={partnerForm.facilities}
-                onChange={(event) => handlePartnerFieldChange("facilities", event.target.value)}
-                className="bg-white/[0.08] text-white"
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="partner-website">Website / booking URL</Label>
-              <Input
-                id="partner-website"
-                value={partnerForm.website}
-                onChange={(event) => handlePartnerFieldChange("website", event.target.value)}
-                placeholder="https://"
-                className="bg-white/[0.08] text-white"
-              />
-            </div>
-
-            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.05] px-4 py-3">
-              <div>
-                <p className="text-sm font-medium text-white">Bonus program</p>
-                <p className="text-xs text-slate-400">
-                  Toggle if this partner participates in the Lasermax bonus program.
-                </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-2">
+                  <Label htmlFor="partner-contact-name">Contact name</Label>
+                  <Input
+                    id="partner-contact-name"
+                    value={partnerForm.contactName}
+                    onChange={(event) =>
+                      handlePartnerFieldChange(
+                        "contactName",
+                        event.target.value
+                      )
+                    }
+                    className="bg-white/[0.08] text-white"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="partner-contact-email">Contact email</Label>
+                  <Input
+                    id="partner-contact-email"
+                    value={partnerForm.contactEmail}
+                    onChange={(event) =>
+                      handlePartnerFieldChange(
+                        "contactEmail",
+                        event.target.value
+                      )
+                    }
+                    className="bg-white/[0.08] text-white"
+                  />
+                </div>
               </div>
-              <Switch
-                checked={partnerForm.bonusProgramEnabled}
-                onCheckedChange={(value) => handlePartnerFieldChange("bonusProgramEnabled", value)}
-              />
-            </div>
 
-            <div className="grid gap-2">
-              <Label htmlFor="partner-notes">Internal notes</Label>
-              <Textarea
-                id="partner-notes"
-                value={partnerForm.notes}
-                onChange={(event) => handlePartnerFieldChange("notes", event.target.value)}
-                className="bg-white/[0.08] text-white"
-                rows={4}
-              />
-            </div>
+              <div className="grid gap-2">
+                <Label htmlFor="partner-payments">
+                  Accepted payments (comma or newline separated)
+                </Label>
+                <Textarea
+                  id="partner-payments"
+                  value={partnerForm.payments}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("payments", event.target.value)
+                  }
+                  className="bg-white/[0.08] text-white"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="partner-facilities">
+                  Facilities (comma or newline separated)
+                </Label>
+                <Textarea
+                  id="partner-facilities"
+                  value={partnerForm.facilities}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("facilities", event.target.value)
+                  }
+                  className="bg-white/[0.08] text-white"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="partner-website">Website / booking URL</Label>
+                <Input
+                  id="partner-website"
+                  value={partnerForm.website}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("website", event.target.value)
+                  }
+                  placeholder="https://"
+                  className="bg-white/[0.08] text-white"
+                />
+              </div>
 
-            <p className="text-xs text-slate-500">
-              Last updated: {partnerForm.updatedAt ? formatDate(partnerForm.updatedAt) : "—"}
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={closePartnerEditor}
-              className={cn(secondaryButtonClass)}
-              disabled={savingPartner}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSavePartner}
-              className={cn(primaryButtonClass)}
-              disabled={savingPartner}
-            >
-              {savingPartner ? "Saving..." : "Save changes"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      ) : null}
-    </Dialog>
+              <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.05] px-4 py-3">
+                <div>
+                  <p className="text-sm font-medium text-white">
+                    Bonus program
+                  </p>
+                  <p className="text-xs text-slate-400">
+                    Toggle if this partner participates in the Lasermax bonus
+                    program.
+                  </p>
+                </div>
+                <Switch
+                  checked={partnerForm.bonusProgramEnabled}
+                  onCheckedChange={(value) =>
+                    handlePartnerFieldChange("bonusProgramEnabled", value)
+                  }
+                />
+              </div>
+
+              <div className="grid gap-2">
+                <Label htmlFor="partner-notes">Internal notes</Label>
+                <Textarea
+                  id="partner-notes"
+                  value={partnerForm.notes}
+                  onChange={(event) =>
+                    handlePartnerFieldChange("notes", event.target.value)
+                  }
+                  className="bg-white/[0.08] text-white"
+                  rows={4}
+                />
+              </div>
+
+              <p className="text-xs text-slate-500">
+                Last updated:{" "}
+                {partnerForm.updatedAt
+                  ? formatDate(partnerForm.updatedAt)
+                  : "—"}
+              </p>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={closePartnerEditor}
+                className={cn(secondaryButtonClass)}
+                disabled={savingPartner}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSavePartner}
+                className={cn(primaryButtonClass)}
+                disabled={savingPartner}
+              >
+                {savingPartner ? "Saving..." : "Save changes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        ) : null}
+      </Dialog>
     </>
   );
 }
 
-function MetricCard({ title, value, subtitle, className = "", style }: MetricCardProps) {
+function MetricCard({
+  title,
+  value,
+  subtitle,
+  className = "",
+  style,
+}: MetricCardProps) {
   return (
-    <Card className={`group border-white/20 bg-gradient-to-br from-white/[0.06] to-white/[0.1] backdrop-blur-xl shadow-lg hover:shadow-xl transition-all duration-300 hover:border-white/30 hover:from-white/[0.08] hover:to-white/[0.12] overflow-hidden relative rounded-xl ${className}`} style={style}>
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-      <CardContent className="p-4 relative z-10">
+    <Card
+      className={`border-white/20 bg-gradient-to-br from-white/[0.06] to-white/[0.1] backdrop-blur-xl shadow-lg overflow-hidden relative rounded-xl ${className}`}
+      style={style}
+    >
+      <CardContent className="p-4">
         <div className="flex flex-col gap-3">
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-300 group-hover:text-slate-200 transition-colors">
+          <p className="text-xs font-semibold uppercase tracking-wider text-slate-300">
             {title}
           </p>
-          <p className="text-2xl font-bold text-white group-hover:text-blue-50 transition-colors duration-300">{value}</p>
+          <p className="text-2xl font-bold text-white">{value}</p>
           {subtitle && (
-            <p className="text-xs text-slate-400 group-hover:text-slate-300 leading-relaxed transition-colors">
-              {subtitle}
-            </p>
+            <p className="text-xs text-slate-400 leading-relaxed">{subtitle}</p>
           )}
         </div>
       </CardContent>
-      {/* Subtle border glow effect */}
-      <div className="absolute inset-0 rounded-xl ring-1 ring-white/10 group-hover:ring-white/20 transition-all duration-300"></div>
+      <div className="absolute inset-0 rounded-xl ring-1 ring-white/10"></div>
     </Card>
   );
 }

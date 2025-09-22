@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 
-export default function AdminLogin(): JSX.Element {
+export default function AdminLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
   const [email, setEmail] = useState<string>("");
@@ -57,7 +57,7 @@ export default function AdminLogin(): JSX.Element {
       <div className="absolute inset-0 bg-gradient-to-br from-blue-900/3 via-transparent to-violet-900/3"></div>
       <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-blue-500/[0.02] rounded-full blur-3xl"></div>
       <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-violet-500/[0.02] rounded-full blur-3xl"></div>
-      
+
       <Card className="glass-card w-full max-w-sm text-slate-100 shadow-xl hover-lift animate-scale-in rounded-2xl relative z-10 border-white/5">
         <CardHeader className="space-y-6 text-center pb-6">
           <div className="flex justify-center">
@@ -69,7 +69,9 @@ export default function AdminLogin(): JSX.Element {
             </div>
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold text-gradient mb-2">Admin Login</CardTitle>
+            <CardTitle className="text-2xl font-bold text-gradient mb-2">
+              Admin Login
+            </CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
               Dashboard management
             </CardDescription>
@@ -78,7 +80,10 @@ export default function AdminLogin(): JSX.Element {
         <CardContent className="px-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-xs font-medium text-slate-300 uppercase tracking-wider">
+              <Label
+                htmlFor="email"
+                className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+              >
                 Email
               </Label>
               <Input
@@ -94,7 +99,10 @@ export default function AdminLogin(): JSX.Element {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-xs font-medium text-slate-300 uppercase tracking-wider">
+              <Label
+                htmlFor="password"
+                className="text-xs font-medium text-slate-300 uppercase tracking-wider"
+              >
                 Password
               </Label>
               <Input
@@ -125,7 +133,7 @@ export default function AdminLogin(): JSX.Element {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="px-6 pb-6 pt-4">
+        <CardFooter className="px-6 pb-6 pt-4 justify-center align-middle">
           <div className="glass-card-light rounded-lg p-3 text-center">
             <p className="text-xs text-muted-foreground">
               Use credentials from your platform administrator.

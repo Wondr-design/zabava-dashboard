@@ -97,9 +97,9 @@ export default function PartnerDashboard() {
   const userEmail = user?.email || "";
 
   const primaryButtonClass =
-    "bg-white text-slate-950 hover:bg-white/90 border border-white/80";
+    "bg-white text-slate-950 border border-white/80";
   const secondaryButtonClass =
-    "bg-white/70 text-slate-950 hover:bg-white/60 border border-white/60";
+    "bg-white/70 text-slate-950 border border-white/60";
 
   const { data, loading, error, refetch } = usePartnerData(partnerId, {
     token,
@@ -654,17 +654,13 @@ export default function PartnerDashboard() {
                 size="sm"
                 className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring disabled:opacity-50"
               >
-                {refreshing ? (
-                  <RefreshCcw className="size-3 animate-spin mr-1.5" />
-                ) : (
-                  <RefreshCcw className="size-3 mr-1.5" />
-                )}
+                <RefreshCcw className="size-3 mr-1.5" />
                 {refreshing ? "Refreshing" : "Refresh"}
               </Button>
               <Button
                 onClick={handleLogout}
                 size="sm"
-                className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 hover:text-red-100 hover:bg-red-500/10 hover:border-red-500/20 focus-ring"
+                className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 focus-ring"
               >
                 <LogOut className="size-3 mr-1.5" />
                 Logout
@@ -675,7 +671,7 @@ export default function PartnerDashboard() {
 
         <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col space-y-8 px-6 py-8">
           {error && (
-            <div className="glass-card rounded-xl border border-red-400/20 bg-red-500/5 p-4 text-sm text-red-300 animate-scale-in">
+            <div className="glass-card rounded-xl border border-red-400/20 bg-red-500/5 p-4 text-sm text-red-300">
               {error.message ||
                 "Unable to load partner data. Please try again."}
             </div>
@@ -683,7 +679,7 @@ export default function PartnerDashboard() {
 
           <section
             ref={overviewRef}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 animate-slide-up"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
           >
             <MetricCard
               title="Total submissions"
@@ -722,8 +718,8 @@ export default function PartnerDashboard() {
             />
           </section>
 
-          <section className="grid gap-6 xl:grid-cols-3 animate-scale-in">
-            <Card className="glass-card hover-lift xl:col-span-2 rounded-xl">
+          <section className="grid gap-6 xl:grid-cols-3">
+            <Card className="glass-card xl:col-span-2 rounded-xl">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-bold text-gradient">
                   Revenue trend
@@ -820,7 +816,7 @@ export default function PartnerDashboard() {
               </CardFooter>
             </Card>
 
-            <Card className="glass-card hover-lift rounded-xl">
+            <Card className="glass-card rounded-xl">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-bold text-gradient">
                   Ticket distribution
@@ -903,8 +899,7 @@ export default function PartnerDashboard() {
 
           <section
             ref={submissionsRef}
-            className="animate-fade-in"
-            style={{ animationDelay: "0.3s" }}
+            className=""
           >
             <Card className="glass-card rounded-xl">
               <CardHeader className="flex flex-wrap items-center justify-between gap-4 space-y-0 pb-4">
@@ -1069,7 +1064,7 @@ function BadgeWithIcon({
 }) {
   const Icon = icon;
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300 hover:bg-white/10 transition-colors">
+    <span className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-slate-300">
       <Icon className="size-3" />
       {label}
     </span>
