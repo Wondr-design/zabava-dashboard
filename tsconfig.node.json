@@ -6,10 +6,11 @@
     "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
+    "checkJs": false,
     "types": ["node"],
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["vite.config.*"],
+  "include": ["vite.config.js", "vite.config.ts", "vite.config.*.js", "vite.config.*.ts"],
   "exclude": ["**/node_modules/**", "eslint.config.*"]
 }

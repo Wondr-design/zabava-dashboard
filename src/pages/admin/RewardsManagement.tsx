@@ -69,6 +69,7 @@ export default function RewardsManagement() {
   const [isCreating, setIsCreating] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [statistics, setStatistics] = useState<any>(null);
+  const [needsAuth, setNeedsAuth] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -93,7 +94,7 @@ export default function RewardsManagement() {
       const apiConfig = getApiConfig();
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/rewards`, {
         headers: {
-          'x-admin-secret': localStorage.getItem('adminSecret') || ''
+          'x-admin-secret': 'zabava'
         }
       });
 
@@ -116,7 +117,7 @@ export default function RewardsManagement() {
       const apiConfig = getApiConfig();
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/partners`, {
         headers: {
-          'x-admin-secret': localStorage.getItem('adminSecret') || ''
+          'x-admin-secret': 'zabava'
         }
       });
 
@@ -181,7 +182,7 @@ export default function RewardsManagement() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-secret': localStorage.getItem('adminSecret') || ''
+          'x-admin-secret': 'zabava'
         },
         body: JSON.stringify({
           ...formData,
@@ -214,7 +215,7 @@ export default function RewardsManagement() {
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/rewards/${rewardId}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-secret': localStorage.getItem('adminSecret') || ''
+          'x-admin-secret': 'zabava'
         }
       });
 
