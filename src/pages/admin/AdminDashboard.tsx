@@ -43,6 +43,7 @@ import {
   Tooltip,
   Legend,
 } from "recharts";
+import { Sun, Moon } from "lucide-react";
 
 function formatDate(iso: string | null | undefined): string {
   if (!iso) return "—";
@@ -99,6 +100,21 @@ interface MetricCardProps {
 }
 
 export default function AdminDashboard() {
+  // Theme (light default; toggles Tailwind 'dark' class on <html>)
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    const saved = localStorage.getItem("theme");
+    if (saved === "dark" || saved === "light") return saved;
+    return "light";
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") root.classList.add("dark");
+    else root.classList.remove("dark");
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === "dark" ? "light" : "dark"));
   const navigate = useNavigate();
   const { user, token, logout } = useAuth();
   const isAdmin = user?.role === "admin";
@@ -770,13 +786,13 @@ export default function AdminDashboard() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-slate-100 relative overflow-hidden">
+<div className="min-h-screen bg-gray-50 text-gray-900 dark:bg-gradient-to-br dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 dark:text-slate-100 relative overflow-hidden">
         {/* Subtle background effects */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5"></div>
-        <div className="absolute top-0 left-1/4 w-72 h-72 bg-blue-500/3 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
+<div className="hidden dark:block absolute inset-0 bg-gradient-to-br from-blue-900/5 via-transparent to-purple-900/5"></div>
+        <div className="hidden dark:block absolute top-0 left-1/4 w-72 h-72 bg-blue-500/3 rounded-full blur-3xl"></div>
+        <div className="hidden dark:block absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/3 rounded-full blur-3xl"></div>
         <div className="relative z-10">
-          <header className="glass-card border-b border-white/10 backdrop-blur-xl sticky top-0">
+<header className="bg-white dark:glass-card border-b border-gray-200 dark:border-white/10 backdrop-blur-xl sticky top-0">
             <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-6 px-6 py-4">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -786,16 +802,26 @@ export default function AdminDashboard() {
                   <div className="absolute -inset-1 bg-gradient-to-br from-blue-500/20 to-violet-600/20 rounded-xl blur opacity-75"></div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gradient">
+<h1 className="text-xl font-bold text-gray-900 dark:text-white">
                     Admin Console
                   </h1>
-                  <p className="text-xs text-muted-foreground">
+<p className="text-xs text-gray-500 dark:text-muted-foreground">
                     Dashboard & Analytics
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="glass-card-light rounded-xl px-3 py-2 text-center">
+<div className="flex items-center gap-2">
+                {/* Theme toggle */}
+                <Button
+                  onClick={toggleTheme}
+                  size="icon"
+                  variant="outline"
+                  className="rounded-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-100 dark:bg-transparent dark:text-white dark:border-white/20"
+                  title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+                >
+                  {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </Button>
+<div className="rounded-xl px-3 py-2 text-center bg-gray-100 text-gray-900 dark:glass-card-light dark:text-white">
                   <p className="text-xs font-medium text-white">
                     {user?.email}
                   </p>
@@ -814,14 +840,14 @@ export default function AdminDashboard() {
                   onClick={refreshOverview}
                   disabled={loadingOverview}
                   size="sm"
-                  className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium focus-ring disabled:opacity-50"
+className="rounded-lg px-3 py-1.5 text-xs font-medium focus-ring bg-gray-100 text-gray-900 hover:bg-gray-200 dark:btn-minimal disabled:opacity-50"
                 >
                   {loadingOverview ? "Refreshing..." : "Refresh"}
                 </Button>
                 <Button
                   onClick={handleLogout}
                   size="sm"
-                  className="btn-minimal rounded-lg px-3 py-1.5 text-xs font-medium text-red-200 focus-ring"
+className="rounded-lg px-3 py-1.5 text-xs font-medium focus-ring bg-white text-red-600 border border-red-200 hover:bg-red-50 dark:btn-minimal dark:text-red-200"
                 >
                   Logout
                 </Button>
@@ -879,14 +905,14 @@ export default function AdminDashboard() {
                       setPartnerSearchTerm(event.target.value)
                     }
                     placeholder="Search partner or contact"
-                    className="w-full max-w-sm bg-white/[0.08] text-white"
+className="w-full max-w-sm bg-white text-gray-900 border border-gray-300 dark:bg-white/10 dark:text-white dark:border-white/10"
                   />
                   <select
                     value={partnerStatusFilter}
                     onChange={(event) =>
                       setPartnerStatusFilter(event.target.value)
                     }
-                    className="rounded-md border border-white/10 bg-white/[0.08] px-3 py-2 text-sm text-white"
+className="rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-white/10 dark:bg-white/10 dark:text-white"
                   >
                     <option value="all">All statuses</option>
                     <option value="active">Active</option>
@@ -915,8 +941,8 @@ export default function AdminDashboard() {
                 </div>
               </div>
               <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-white/10">
-                  <thead className="bg-white/[0.04]">
+<table className="min-w-full divide-y divide-gray-200 dark:divide-white/10">
+<thead className="bg-gray-50 dark:bg-white/[0.04]">
                     <tr>
                       <th className="px-3 py-2 text-left text-xs font-medium uppercase tracking-wider text-slate-300">
                         Partner

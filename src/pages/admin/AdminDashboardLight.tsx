@@ -229,6 +229,10 @@ export default function AdminDashboardLight() {
   );
   const numberFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
+  // Simple formatting helpers used by child views
+  const formatNumber = (value: number): string => numberFormatter.format(value);
+  const formatCurrency = (value: number): string => currencyFormatter.format(value);
+
   // Admin access check - same as original AdminDashboard
   useEffect(() => {
     if (!isAdmin) {
@@ -733,7 +737,13 @@ export default function AdminDashboardLight() {
   );
 }
 
-const AdminOverview = ({ metrics, formatNumber, formatCurrency }) => (
+interface AdminOverviewProps {
+  metrics: AdminMetrics;
+  formatNumber: (value: number) => string;
+  formatCurrency: (value: number) => string;
+}
+
+const AdminOverview = ({ metrics, formatNumber, formatCurrency }: AdminOverviewProps) => (
   <div className="space-y-6">
     {/* Metrics Grid */}
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -880,7 +890,7 @@ const AdminOverview = ({ metrics, formatNumber, formatCurrency }) => (
                 paddingAngle={5}
                 dataKey="value"
               >
-                {metrics.revenueByPartner.map((entry, index) => (
+                {metrics.revenueByPartner.map((entry: PieDataPoint, index: number) => (
                   <Cell
                     key={`cell-${index}`}
                     fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -891,7 +901,7 @@ const AdminOverview = ({ metrics, formatNumber, formatCurrency }) => (
             </PieChart>
           </ResponsiveContainer>
           <div className="mt-4 space-y-2">
-            {metrics.revenueByPartner.slice(0, 4).map((item, index) => (
+            {metrics.revenueByPartner.slice(0, 4).map((item: PieDataPoint, index: number) => (
               <div
                 key={item.name}
                 className="flex items-center justify-between"
@@ -986,7 +996,13 @@ const AdminOverview = ({ metrics, formatNumber, formatCurrency }) => (
   </div>
 );
 
-const AdminSubmissions = ({ metrics, loading, onRefresh }) => (
+interface AdminSubmissionsProps {
+  metrics: AdminMetrics;
+  loading: boolean;
+  onRefresh: () => Promise<void> | void;
+}
+
+const AdminSubmissions = ({ metrics, loading, onRefresh }: AdminSubmissionsProps) => (
   <Card>
     <CardHeader>
       <div className="flex items-center justify-between">
