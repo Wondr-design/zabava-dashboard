@@ -48,6 +48,7 @@ import { API_BASE_URL } from "@/lib/config";
 import { useAuth } from "@/context/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MetricCard } from "@/components/MetricCard";
+import { RedemptionProcessor } from "@/components/RedemptionProcessor";
 import type { SubmissionRecord } from "@/types/dashboard";
 
 const COLORS = ["#22d3ee", "#a855f7", "#f97316", "#4ade80", "#facc15"];
@@ -107,11 +108,12 @@ export default function PartnerDashboard() {
   });
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const [activeSection, setActiveSection] = useState<
-    "overview" | "submissions"
+    "overview" | "submissions" | "redemptions"
   >("overview");
 
   const overviewRef = useRef<HTMLDivElement | null>(null);
   const submissionsRef = useRef<HTMLDivElement | null>(null);
+  const redemptionsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (!partnerId) {
@@ -512,6 +514,11 @@ export default function PartnerDashboard() {
         label: "Submissions",
         active: activeSection === "submissions",
       },
+      {
+        id: "redemptions",
+        label: "Redemptions",
+        active: activeSection === "redemptions",
+      },
     ],
     [activeSection]
   );
@@ -531,11 +538,12 @@ export default function PartnerDashboard() {
     }
 
     const sections: Array<{
-      id: "overview" | "submissions";
+      id: "overview" | "submissions" | "redemptions";
       ref: RefObject<HTMLDivElement | null>;
     }> = [
       { id: "overview", ref: overviewRef },
       { id: "submissions", ref: submissionsRef },
+      { id: "redemptions", ref: redemptionsRef },
     ];
 
     const observer = new IntersectionObserver(
@@ -677,10 +685,31 @@ export default function PartnerDashboard() {
             </div>
           )}
 
-          <section
-            ref={overviewRef}
-            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
-          >
+          {/* Navigation Tabs */}
+          <div className="flex gap-2">
+            {navigationItems.map((item) => (
+              <Button
+                key={item.id}
+                variant={item.active ? "default" : "outline"}
+                size="sm"
+                onClick={() => setActiveSection(item.id)}
+                className={cn(
+                  "transition-all",
+                  item.active
+                    ? "bg-emerald-500/20 text-emerald-200 border-emerald-500/30"
+                    : "glass-card-light text-slate-300 hover:text-white"
+                )}
+              >
+                {item.label}
+              </Button>
+            ))}
+          </div>
+
+          {activeSection === "overview" && (
+            <section
+              ref={overviewRef}
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5"
+            >
             <MetricCard
               title="Total submissions"
               value={numberFormatter.format(metrics.count)}
@@ -716,9 +745,11 @@ export default function PartnerDashboard() {
                 metrics.notVisited
               )} awaiting confirmation`}
             />
-          </section>
+            </section>
+          )}
 
-          <section className="grid gap-6 xl:grid-cols-3">
+          {activeSection === "overview" && (
+            <section className="grid gap-6 xl:grid-cols-3">
             <Card className="glass-card xl:col-span-2 rounded-xl">
               <CardHeader className="pb-4">
                 <CardTitle className="text-lg font-bold text-gradient">
@@ -895,12 +926,14 @@ export default function PartnerDashboard() {
                 </CardFooter>
               ) : null}
             </Card>
-          </section>
+            </section>
+          )}
 
-          <section
-            ref={submissionsRef}
-            className=""
-          >
+          {activeSection === "submissions" && (
+            <section
+              ref={submissionsRef}
+              className=""
+            >
             <Card className="glass-card rounded-xl">
               <CardHeader className="flex flex-wrap items-center justify-between gap-4 space-y-0 pb-4">
                 <div>
@@ -1048,7 +1081,15 @@ export default function PartnerDashboard() {
                 />
               </CardContent>
             </Card>
-          </section>
+            </section>
+          )}
+
+          {/* Redemptions Section */}
+          {activeSection === "redemptions" && (
+            <section ref={redemptionsRef}>
+              <RedemptionProcessor partnerId={partnerId} token={token} />
+            </section>
+          )}
         </main>
       </div>
     </div>

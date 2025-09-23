@@ -14,6 +14,11 @@ export interface SubmissionRecord {
   attractionName?: string;
   partnerName?: string;
   partnerLabel?: string;
+  // Redemption fields
+  redemptionCode?: string;
+  hasRedemption?: string;
+  redemptionReward?: string;
+  redemptionValue?: number;
   originalPayload?: Record<string, unknown> | null;
   [key: string]: unknown;
 }

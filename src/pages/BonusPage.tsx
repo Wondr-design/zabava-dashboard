@@ -119,18 +119,31 @@ export default function BonusPage() {
   };
 
   const handleRedeemReward = async (reward: any) => {
+    // Validate inputs before making the request
+    if (!userData?.user?.email) {
+      setError('User email not found. Please refresh the page.');
+      return;
+    }
+    
+    if (!reward?.id) {
+      setError('Invalid reward selected. Please try again.');
+      return;
+    }
+    
     setIsRedeeming(true);
     setError('');
 
     try {
       const apiConfig = getApiConfig();
+      console.log('Redeeming reward:', { email: userData.user.email, rewardId: reward.id });
+      
       const response = await fetch(`${apiConfig.baseUrl}/api/bonus/redeem-reward`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          email: userData?.user.email,
+          email: userData.user.email,
           rewardId: reward.id
         })
       });
@@ -444,44 +457,85 @@ export default function BonusPage() {
 
         {/* Redemptions Tab */}
         <TabsContent value="redemptions" className="space-y-4">
+          {/* Active Redemptions Info Box */}
+          {userData.redemptions.filter(r => r.status === 'pending' || r.status === 'applied').length > 0 && (
+            <Alert className="border-primary">
+              <Star className="h-4 w-4" />
+              <AlertTitle>How to use your redemption codes</AlertTitle>
+              <AlertDescription>
+                When booking your next visit on our website, enter the redemption code in the "Redemption Code" field. 
+                The partner will see your reward details and process it when you arrive.
+              </AlertDescription>
+            </Alert>
+          )}
+
           <div className="grid grid-cols-1 gap-4">
-            {userData.redemptions.map((redemption) => (
-              <Card key={redemption.id}>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className="text-lg">{redemption.rewardName}</CardTitle>
-                      <CardDescription>
-                        Code: {redemption.id}
-                      </CardDescription>
+            {userData.redemptions.map((redemption) => {
+              const isActive = redemption.status === 'pending' || redemption.status === 'applied';
+              const isUsed = redemption.status === 'used';
+              const isExpired = new Date(redemption.expiresAt) < new Date();
+              
+              return (
+                <Card key={redemption.id} className={!isActive ? 'opacity-75' : ''}>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <Gift className="h-5 w-5" />
+                          {redemption.rewardName}
+                        </CardTitle>
+                        <div className="mt-2 p-3 bg-muted rounded-md">
+                          <p className="text-xs text-muted-foreground mb-1">Redemption Code:</p>
+                          <p className="font-mono text-lg font-bold">{redemption.id}</p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col gap-2 items-end">
+                        <Badge variant={getStatusColor(redemption.status) as any}>
+                          {redemption.status === 'pending' ? 'Ready to Use' : 
+                           redemption.status === 'applied' ? 'Applied to Booking' :
+                           redemption.status === 'used' ? 'Used' : redemption.status}
+                        </Badge>
+                        {isExpired && !isUsed && (
+                          <Badge variant="destructive">Expired</Badge>
+                        )}
+                      </div>
                     </div>
-                    <Badge variant={getStatusColor(redemption.status) as any}>
-                      {redemption.status}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <p className="text-muted-foreground">Redeemed</p>
-                      <p className="font-medium">
-                        {format(new Date(redemption.redeemedAt), 'MMM dd, yyyy')}
-                      </p>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      {isActive && !isExpired && (
+                        <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200">
+                          <AlertCircle className="h-4 w-4 text-blue-600" />
+                          <AlertDescription className="text-sm">
+                            <strong>To use this reward:</strong> Enter code <span className="font-mono font-bold">{redemption.id}</span> 
+                            when making your next booking on our website.
+                          </AlertDescription>
+                        </Alert>
+                      )}
+                      
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-muted-foreground">Redeemed</p>
+                          <p className="font-medium">
+                            {format(new Date(redemption.redeemedAt), 'MMM dd, yyyy')}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Points Spent</p>
+                          <p className="font-medium">{redemption.pointsSpent} pts</p>
+                        </div>
+                        <div>
+                          <p className="text-muted-foreground">Expires</p>
+                          <p className="font-medium">
+                            {format(new Date(redemption.expiresAt), 'MMM dd, yyyy')}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-muted-foreground">Points Spent</p>
-                      <p className="font-medium">{redemption.pointsSpent} pts</p>
-                    </div>
-                    <div>
-                      <p className="text-muted-foreground">Expires</p>
-                      <p className="font-medium">
-                        {format(new Date(redemption.expiresAt), 'MMM dd, yyyy')}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
 
             {userData.redemptions.length === 0 && (
               <Alert>
@@ -555,7 +609,7 @@ export default function BonusPage() {
 
       {/* Success Dialog */}
       <Dialog open={!!redemptionSuccess} onOpenChange={() => setRedemptionSuccess(null)}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Check className="h-5 w-5 text-green-500" />
@@ -565,17 +619,19 @@ export default function BonusPage() {
           
           {redemptionSuccess && (
             <div className="space-y-4">
-              <Alert>
-                <Trophy className="h-4 w-4" />
+              <Alert className="border-green-200 bg-green-50 dark:bg-green-950">
+                <Trophy className="h-4 w-4 text-green-600" />
                 <AlertTitle>Your Redemption Code</AlertTitle>
-                <AlertDescription className="mt-2">
-                  <code className="text-lg font-mono bg-muted p-2 rounded">
-                    {redemptionSuccess.code}
-                  </code>
+                <AlertDescription className="mt-3">
+                  <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-md border-2 border-dashed border-green-300">
+                    <p className="text-2xl font-mono font-bold text-green-600">
+                      {redemptionSuccess.code}
+                    </p>
+                  </div>
                 </AlertDescription>
               </Alert>
 
-              <div className="space-y-2">
+              <div className="bg-muted p-4 rounded-lg space-y-2">
                 <p className="text-sm">
                   <strong>Reward:</strong> {redemptionSuccess.rewardName}
                 </p>
@@ -586,14 +642,20 @@ export default function BonusPage() {
                   <strong>Remaining Balance:</strong> {redemptionSuccess.remainingPoints} pts
                 </p>
                 <p className="text-sm">
-                  <strong>Expires:</strong> {format(new Date(redemptionSuccess.expiresAt), 'MMMM dd, yyyy')}
+                  <strong>Valid Until:</strong> {format(new Date(redemptionSuccess.expiresAt), 'MMMM dd, yyyy')}
                 </p>
               </div>
 
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  {redemptionSuccess.instructions}
+              <Alert className="border-blue-200">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertTitle className="text-sm">How to use this code</AlertTitle>
+                <AlertDescription className="text-sm mt-2">
+                  <ol className="list-decimal list-inside space-y-1">
+                    <li>Go to our booking website</li>
+                    <li>Fill out the appointment form</li>
+                    <li>Enter code <span className="font-mono font-bold">{redemptionSuccess.code}</span> in the "Redemption Code" field</li>
+                    <li>The partner will apply your reward when you arrive</li>
+                  </ol>
                 </AlertDescription>
               </Alert>
             </div>

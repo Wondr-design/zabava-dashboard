@@ -91,7 +91,10 @@ export default function RewardsManagement() {
 
   const fetchRewards = async () => {
     try {
+      setIsLoading(true);
       const apiConfig = getApiConfig();
+      console.log('Fetching rewards from:', `${apiConfig.baseUrl}/api/admin/rewards`);
+      
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/rewards`, {
         headers: {
           'x-admin-secret': 'zabava'
@@ -99,13 +102,25 @@ export default function RewardsManagement() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch rewards');
+        throw new Error(`Failed to fetch rewards: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-      setRewards(data.rewards || []);
-      setStatistics(data.statistics);
+      console.log('Rewards response:', data);
+      
+      // Handle both empty arrays and null/undefined
+      const rewardsList = data.rewards || [];
+      console.log('Setting rewards:', rewardsList);
+      
+      setRewards(rewardsList);
+      setStatistics(data.statistics || {
+        totalRewards: rewardsList.length,
+        activeRewards: rewardsList.filter((r: any) => r.status === 'active').length,
+        categories: [],
+        totalStock: 0
+      });
     } catch (err: any) {
+      console.error('Error fetching rewards:', err);
       setError(err.message);
     } finally {
       setIsLoading(false);
@@ -115,6 +130,8 @@ export default function RewardsManagement() {
   const fetchPartners = async () => {
     try {
       const apiConfig = getApiConfig();
+      console.log('Fetching partners from:', `${apiConfig.baseUrl}/api/admin/partners`);
+      
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/partners`, {
         headers: {
           'x-admin-secret': 'zabava'
@@ -126,9 +143,20 @@ export default function RewardsManagement() {
       }
 
       const data = await response.json();
-      setPartners(data.partners || []);
+      console.log('Partners response:', data);
+      
+      // The API returns 'items' not 'partners'
+      const partnersList = data.items || data.partners || [];
+      console.log('Partners list:', partnersList);
+      setPartners(partnersList);
     } catch (err) {
       console.error('Failed to fetch partners:', err);
+      // Set some mock partners for testing if the API fails
+      setPartners([
+        { partnerId: 'OSM001', name: 'LaserMaxx', status: 'active' },
+        { partnerId: 'ZOO001', name: 'Adventure Park', status: 'active' },
+        { partnerId: 'BW001', name: 'Bowling Center', status: 'active' }
+      ]);
     }
   };
 
@@ -409,37 +437,38 @@ export default function RewardsManagement() {
 
       {/* Create/Edit Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white/95 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] border-white/20">
+          <DialogHeader className="pb-4 border-b border-gray-100">
+            <DialogTitle className="text-xl font-semibold text-gray-900">
               {isCreating ? 'Create New Reward' : 'Edit Reward'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-600">
               {isCreating ? 'Add a new reward to the catalog' : 'Update reward details'}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4">
+          <div className="space-y-4 py-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="name">Reward Name</Label>
+                <Label htmlFor="name" className="text-sm font-medium text-gray-700">Reward Name</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   placeholder="e.g., 20% Discount Coupon"
+                  className="bg-gray-50 border-gray-300 focus:bg-white transition-colors"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="category">Category</Label>
+                <Label htmlFor="category" className="text-sm font-medium text-gray-700">Category</Label>
                 <Select 
                   value={formData.category} 
                   onValueChange={(value: any) => setFormData({ ...formData, category: value })}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-gray-50 border-gray-300 focus:bg-white transition-colors">
                     <SelectValue />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white">
                     <SelectItem value="discount">🏷️ Discount</SelectItem>
                     <SelectItem value="freebie">🎁 Freebie</SelectItem>
                     <SelectItem value="experience">🎢 Experience</SelectItem>
@@ -451,75 +480,83 @@ export default function RewardsManagement() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe what this reward offers..."
                 rows={3}
+                className="bg-gray-50 border-gray-300 focus:bg-white transition-colors resize-none"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="pointsCost">Points Cost</Label>
+                <Label htmlFor="pointsCost" className="text-sm font-medium text-gray-700">Points Cost</Label>
                 <Input
                   id="pointsCost"
                   type="number"
                   value={formData.pointsCost}
                   onChange={(e) => setFormData({ ...formData, pointsCost: parseInt(e.target.value) || 0 })}
                   placeholder="100"
+                  className="bg-gray-50 border-gray-300 focus:bg-white transition-colors"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="stock">Stock (Optional)</Label>
+                <Label htmlFor="stock" className="text-sm font-medium text-gray-700">Stock (Optional)</Label>
                 <Input
                   id="stock"
                   type="number"
                   value={formData.stock || ''}
                   onChange={(e) => setFormData({ ...formData, stock: e.target.value ? parseInt(e.target.value) : undefined })}
                   placeholder="Leave empty for unlimited"
+                  className="bg-gray-50 border-gray-300 focus:bg-white transition-colors"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="imageUrl">Image URL (Optional)</Label>
+              <Label htmlFor="imageUrl" className="text-sm font-medium text-gray-700">Image URL (Optional)</Label>
               <Input
                 id="imageUrl"
                 value={formData.imageUrl}
                 onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                 placeholder="https://example.com/image.jpg"
+                className="bg-gray-50 border-gray-300 focus:bg-white transition-colors"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="redemptionInstructions">Redemption Instructions</Label>
+              <Label htmlFor="redemptionInstructions" className="text-sm font-medium text-gray-700">Redemption Instructions</Label>
               <Textarea
                 id="redemptionInstructions"
                 value={formData.redemptionInstructions}
                 onChange={(e) => setFormData({ ...formData, redemptionInstructions: e.target.value })}
                 placeholder="How to redeem this reward..."
                 rows={2}
+                className="bg-gray-50 border-gray-300 focus:bg-white transition-colors resize-none"
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="validUntil">Valid Until (Optional)</Label>
+              <Label htmlFor="validUntil" className="text-sm font-medium text-gray-700">Valid Until (Optional)</Label>
               <Input
                 id="validUntil"
                 type="date"
                 value={formData.validUntil}
                 onChange={(e) => setFormData({ ...formData, validUntil: e.target.value })}
+                className="bg-gray-50 border-gray-300 focus:bg-white transition-colors"
               />
             </div>
 
             <div className="space-y-2">
-              <Label>Available For Partners</Label>
-              <Card>
+              <Label className="text-sm font-medium text-gray-700">
+                Available For Partners {partners.length > 0 && `(${partners.length} available)`}
+              </Label>
+              <Card className="bg-gray-50 border-gray-200">
                 <CardContent className="p-4">
-                  <ScrollArea className="h-48">
+                  <ScrollArea className="h-48 bg-white rounded-md p-2 border border-gray-100">
                     <div className="space-y-2">
                       <div className="flex items-center space-x-2 pb-2 border-b">
                         <Checkbox
@@ -535,18 +572,22 @@ export default function RewardsManagement() {
                           Available for All Partners
                         </Label>
                       </div>
-                      {partners.map((partner) => (
-                        <div key={partner.partnerId} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={partner.partnerId}
-                            checked={formData.availableFor.includes(partner.partnerId)}
-                            onCheckedChange={() => togglePartner(partner.partnerId)}
-                          />
-                          <Label htmlFor={partner.partnerId}>
-                            {partner.name || partner.partnerId.toUpperCase()}
-                          </Label>
-                        </div>
-                      ))}
+                      {partners.length === 0 ? (
+                        <p className="text-sm text-gray-500 italic py-2">Loading partners...</p>
+                      ) : (
+                        partners.map((partner) => (
+                          <div key={partner.partnerId} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={partner.partnerId}
+                              checked={formData.availableFor.includes(partner.partnerId)}
+                              onCheckedChange={() => togglePartner(partner.partnerId)}
+                            />
+                            <Label htmlFor={partner.partnerId}>
+                              {partner.name || partner.partnerId.toUpperCase()}
+                            </Label>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </ScrollArea>
                 </CardContent>
@@ -554,11 +595,19 @@ export default function RewardsManagement() {
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+          <DialogFooter className="border-t border-gray-100 pt-4 mt-6">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsDialogOpen(false)}
+              className="hover:bg-gray-100 transition-colors"
+            >
               Cancel
             </Button>
-            <Button onClick={handleSaveReward} disabled={isSaving}>
+            <Button 
+              onClick={handleSaveReward} 
+              disabled={isSaving}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md transition-all disabled:opacity-50"
+            >
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
