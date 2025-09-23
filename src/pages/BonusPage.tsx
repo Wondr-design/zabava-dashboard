@@ -135,7 +135,9 @@ export default function BonusPage() {
 
     try {
       const apiConfig = getApiConfig();
-      console.log('Redeeming reward:', { email: userData.user.email, rewardId: reward.id });
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Redeeming reward:', { email: userData.user.email, rewardId: reward.id });
+      }
       
       const response = await fetch(`${apiConfig.baseUrl}/api/bonus/redeem-reward`, {
         method: 'POST',
@@ -504,7 +506,7 @@ export default function BonusPage() {
                   <CardContent>
                     <div className="space-y-3">
                       {isActive && !isExpired && (
-                        <Alert className="bg-blue-50 dark:bg-blue-950 border-blue-200">
+                        <Alert className="bg-blue-50 border-blue-200">
                           <AlertCircle className="h-4 w-4 text-blue-600" />
                           <AlertDescription className="text-sm">
                             <strong>To use this reward:</strong> Enter code <span className="font-mono font-bold">{redemption.id}</span> 
@@ -619,11 +621,11 @@ export default function BonusPage() {
           
           {redemptionSuccess && (
             <div className="space-y-4">
-              <Alert className="border-green-200 bg-green-50 dark:bg-green-950">
+              <Alert className="border-green-200 bg-green-50">
                 <Trophy className="h-4 w-4 text-green-600" />
                 <AlertTitle>Your Redemption Code</AlertTitle>
                 <AlertDescription className="mt-3">
-                  <div className="text-center p-3 bg-white dark:bg-gray-900 rounded-md border-2 border-dashed border-green-300">
+                  <div className="text-center p-3 bg-white rounded-md border-2 border-dashed border-green-300">
                     <p className="text-2xl font-mono font-bold text-green-600">
                       {redemptionSuccess.code}
                     </p>

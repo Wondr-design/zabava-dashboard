@@ -113,7 +113,7 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
 
     try {
       setIsLoading(true);
-      const adminSecret = 'zabava';
+      const adminSecret = import.meta.env.VITE_ADMIN_SECRET || 'zabava';
       
       // Fetch recent activities and convert to notifications
       // Fetch overview first (this should always work)
@@ -134,7 +134,9 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
           }
         });
       } catch (analyticsError) {
-        console.log('Analytics endpoint not available, continuing without it');
+        if (import.meta.env.VITE_DEBUG) {
+          console.log('Analytics endpoint not available, continuing without it');
+        }
       }
 
       const newNotifications: Notification[] = [];

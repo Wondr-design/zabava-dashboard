@@ -59,7 +59,8 @@ interface Partner {
 }
 
 export default function RewardsManagement() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const adminSecret = import.meta.env.VITE_ADMIN_SECRET || 'zabava';
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -93,11 +94,15 @@ export default function RewardsManagement() {
     try {
       setIsLoading(true);
       const apiConfig = getApiConfig();
-      console.log('Fetching rewards from:', `${apiConfig.baseUrl}/api/admin/rewards`);
+      // Debug: fetching rewards
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Fetching rewards from:', `${apiConfig.baseUrl}/api/admin/rewards`);
+      }
       
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/rewards`, {
         headers: {
-          'x-admin-secret': 'zabava'
+          'x-admin-secret': adminSecret,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
 
@@ -106,11 +111,15 @@ export default function RewardsManagement() {
       }
 
       const data = await response.json();
-      console.log('Rewards response:', data);
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Rewards response:', data);
+      }
       
       // Handle both empty arrays and null/undefined
       const rewardsList = data.rewards || [];
-      console.log('Setting rewards:', rewardsList);
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Setting rewards:', rewardsList);
+      }
       
       setRewards(rewardsList);
       setStatistics(data.statistics || {
@@ -130,11 +139,14 @@ export default function RewardsManagement() {
   const fetchPartners = async () => {
     try {
       const apiConfig = getApiConfig();
-      console.log('Fetching partners from:', `${apiConfig.baseUrl}/api/admin/partners`);
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Fetching partners from:', `${apiConfig.baseUrl}/api/admin/partners`);
+      }
       
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/partners`, {
         headers: {
-          'x-admin-secret': 'zabava'
+          'x-admin-secret': adminSecret,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
 
@@ -143,11 +155,15 @@ export default function RewardsManagement() {
       }
 
       const data = await response.json();
-      console.log('Partners response:', data);
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Partners response:', data);
+      }
       
       // The API returns 'items' not 'partners'
       const partnersList = data.items || data.partners || [];
-      console.log('Partners list:', partnersList);
+      if (import.meta.env.VITE_DEBUG) {
+        console.log('Partners list:', partnersList);
+      }
       setPartners(partnersList);
     } catch (err) {
       console.error('Failed to fetch partners:', err);
@@ -210,7 +226,8 @@ export default function RewardsManagement() {
         method,
         headers: {
           'Content-Type': 'application/json',
-          'x-admin-secret': 'zabava'
+          'x-admin-secret': adminSecret,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           ...formData,
@@ -243,7 +260,8 @@ export default function RewardsManagement() {
       const response = await fetch(`${apiConfig.baseUrl}/api/admin/rewards/${rewardId}`, {
         method: 'DELETE',
         headers: {
-          'x-admin-secret': 'zabava'
+          'x-admin-secret': adminSecret,
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       });
 
